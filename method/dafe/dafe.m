@@ -89,7 +89,7 @@ for i=1:probe_set_num
         v0(labeled_gallery_set) = zeros(nl,1);
 
         % parameter: y0
-        y0 = zeros(node_set_num,1);
+        y0 = f0;
         y0(labeled_gallery_set) = feedback_scores;
 
         % parameter: alpha
@@ -125,8 +125,7 @@ for i=1:probe_set_num
         model_para.node_set_num = ctrl_para.dataset.node_set_num;
         
         [f, v, f_mr, f_history] = solve_fv(f0, v0, y0, W, model_para);
-        y0 = f0;
-        y0(labeled_gallery_set) = feedback_scores;
+
 
         %% result collection
         reid_score_f_mr1(:,i,query_times) = f_mr(1:gallery_set_num,1);
