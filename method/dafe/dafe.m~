@@ -77,8 +77,14 @@ for i=1:probe_set_num
         % parameter: f0
         
         if 1==query_times
-            f0 = W(:,end); f0(end) = 1;
+            temp = repmat(probe_feat, 1, node_set_num)-A_set{k};
+            feat_dist = sqrt(diag(temp'*temp));
+            sigma = mean(feat_dist);
+            f0 = exp(-1*feat_dist/sigma);
             f0(1:end) = normalization(f0(1:end), [-1 1], 0, 'range-priority');
+                
+%             f0 = W(:,end); f0(end) = 1;
+%             f0(1:end) = normalization(f0(1:end), [-1 1], 0, 'range-priority');
         else
             f0 = f;
         end
@@ -89,7 +95,7 @@ for i=1:probe_set_num
         v0(labeled_gallery_set) = zeros(nl,1);
 
         % parameter: y0
-        y0 = zeros(node_set_num,1);
+        y0 = f0;
         y0(labeled_gallery_set) = feedback_scores;
 
         % parameter: alpha
