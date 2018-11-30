@@ -1,0 +1,21 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2016 The MathWorks, Inc.
+                   R2016a (9.0.0.341360) 64-bit (glnxa64)
+                             February 11, 2016
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+machine_type=x270, run_mode=parallel, debug_flag=1, version=2018-11-30-02-52-17
+dataset=viper, probe_set_num=10, trial_num=2, tot_query_times=3
+include_groundtruth_flag=0, v_sum_constraint_flag=0
+Starting parallel pool (parpool) using the 'local' profile ... connected to 2 workers.
+Parallel pool using the 'local' profile is shutting down.
+
+
+best parameter set: log(alpha)=0.0, beta-percentage=5.00%, log(gamma)=-10.00, delta=0.00, fbppr=1.00
+best result: auc1=95.74%, auc3=96.60%, better_num=2/2
+
+ time_in_parallel=45 sec, time_in_total_serial=40 sec., time_each_probe:0.33 sec

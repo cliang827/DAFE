@@ -48,7 +48,7 @@ if isfield(filter.row, 'delta_set')
         invalid_para_ix(paras(:,4)==invalid_delta_set(i))=1;
     end
 end
-if isfield(filter.row, 'fbppr_set')
+if isfield(filter.row, 'fb_num_set')
     invalid_fbppr_set = setdiff(unique(paras(:,5)),filter.row.fbppr_set);
     for i=1:length(invalid_fbppr_set)
         invalid_para_ix(paras(:,5)==invalid_fbppr_set(i))=1;
@@ -81,7 +81,7 @@ end
 if ~isempty(strfind(filter.column.name_set, 'delta'))
     filter_column_ix = cat(2, filter_column_ix, 4);
 end
-if ~isempty(strfind(filter.column.name_set, 'fbppr'))
+if ~isempty(strfind(filter.column.name_set, 'fb_num'))
     filter_column_ix = cat(2, filter_column_ix, 5);
 end
 

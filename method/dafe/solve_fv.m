@@ -1,6 +1,6 @@
 function [f, v, f_mr, f_history] = solve_fv(f, v, y, W, model_para)
-% purpose: solve f and V
-%      (1) do f-V iteration since qt=1;
+% purpose: solve f and v
+%      (1) do f-v iteration since qt=1;
 % save('./temp/solve_fv.mat', 'f', 'v', 'y', 'W', 'model_para');
 
 
