@@ -1,9 +1,5 @@
 %% figure 2: alpha/beta/gamma vs. auc(f) and mean(v)/std(v)
-if show_figure_flag
-    hfig = figure('visible', 'on');
-else
-    hfig = figure('visible', 'off');
-end
+hfig = figure;
 assert(ctrl_para.exp_para.tot_query_times==3);
 
 alpha_auc = alpha_set;

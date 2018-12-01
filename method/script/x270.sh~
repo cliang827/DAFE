@@ -1,5 +1,0 @@
-#!/bin/bash
-script_flag=1
-debug_flag=1
-run_mode='parallel'
-matlab -nodesktop -nosplash -nodisplay -r "test_dafe(1, 1, 'parallel')" -logfile x270.log
