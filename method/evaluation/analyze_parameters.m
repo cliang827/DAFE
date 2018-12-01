@@ -128,11 +128,7 @@ switch filter.column.name_set
         draw_fig_v_vs_beta_gamma_qt;
         
     case 'delta'
-        if show_figure_flag
-            hfig = figure('visible', 'on');
-        else
-            hfig = figure('visible', 'off');
-        end
+        hfig = figure;
         delta_set = ctrl_para.exp.delta_set;
         plot(delta_set, mean(auc_y_kmean,2), 'ko--'); hold on;
         plot(delta_set, mean(auc_f_mr,2), 'bs-.'); hold on;
@@ -146,11 +142,7 @@ switch filter.column.name_set
         if ~show_figure_flag, close(hfig); end
 
     case 'fb_num'
-        if show_figure_flag
-            hfig = figure('visible', 'on');
-        else
-            hfig = figure('visible', 'off');
-        end
+        hfig = figure;
         ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
         ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
         for qt=1:tot_query_times
@@ -185,11 +177,7 @@ switch filter.column.name_set
         if show_table_flag, method_cmp_tab, end
         
         %% method comparison - figure version
-        if show_figure_flag
-            hfig = figure('visible', 'on');
-        else
-            hfig = figure('visible', 'off');
-        end
+        hfig = figure;
         plot(auc_y, 'ko--'); hold on;
         plot(auc_f_mr1, 'bs-.'); hold on;
         plot(auc_f_mr2, 'g^-.'); hold on;
@@ -254,11 +242,7 @@ switch filter.column.name_set
             if show_table_flag, rank_detail_tab, end
 
             %% feedback details - figure version
-            if show_figure_flag
-                hfig = figure('visible', 'on');
-            else
-                hfig = figure('visible', 'off');
-            end
+            hfig = figure;
             suptitle('rank position comparison');
             status_tab = zeros(probe_set_num, tot_query_times, tot_query_times);
             for qti=0:tot_query_times-1
@@ -325,11 +309,7 @@ switch filter.column.name_set
             if ~show_figure_flag, close(hfig); end
 
             %% feedback details - figure version
-            if show_figure_flag
-                hfig = figure('visible', 'on');
-            else
-                hfig = figure('visible', 'off');
-            end
+            hfig = figure;
             edges = 0:10:max_rank;
             init_rank = cell2mat(rank_detail(:,1));
             for qt=1:tot_query_times

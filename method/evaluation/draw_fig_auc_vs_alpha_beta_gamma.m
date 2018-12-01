@@ -1,9 +1,5 @@
 %% figure 1: auc vs. alpha+beta+gamma (3D) and alpha-beta/alpha-gamma/beta-gamma (2D)
-if show_figure_flag
-    hfig = figure('visible', 'on');
-else
-    hfig = figure('visible', 'off');
-end
+hfig = figure;
 subplot(2,2,1); % alpha-beta-gamma
 diameter = 100*auc_f_kmean(:,tot_query_times);
 color = auc_f_kmean(:,tot_query_times);

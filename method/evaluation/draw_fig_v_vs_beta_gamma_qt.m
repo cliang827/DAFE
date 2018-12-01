@@ -8,11 +8,7 @@ for i=1:length(alpha_star_ix)
 end
 
 for qt=1:ctrl_para.exp_para.tot_query_times
-    if show_figure_flag
-        hfig = figure('visible', 'on');
-    else
-        hfig = figure('visible', 'off');
-    end
+    hfig = figure;
     for i=1:length(alpha_star_ix)
         subplot(beta_num,gamma_num,i); 
 
