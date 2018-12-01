@@ -1,0 +1,88 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2016 The MathWorks, Inc.
+                   R2016a (9.0.0.341360) 64-bit (glnxa64)
+                             February 11, 2016
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+machine_type=x270, run_mode=serial, debug_flag=1, version=2018-12-1-00-45-45
+dataset=viper, probe_set_num=10, trial_num=2, tot_query_times=3
+include_groundtruth_flag=0, v_sum_constraint_flag=0, script_run_flag=1
+
+[   1/4] fb_method='rank(v)/rank(f)', log(alpha)=0.00, beta_percentage=5.00%, log(gamma)=-Inf, delta=0.00, fb_num=1, t=1
+progress=1/10 ( 10%) ...progress=10/10 (100%) ...progress=10/10 (100%) ... time=9.75 sec.
+
+T = 
+
+    qt      y       f_mr1     f_mr2       f        f_h1      f_h2      f_h3 
+    __    ______    ______    ______    ______    ______    ______    ______
+
+    1     96.635    96.476    96.476    96.476    96.476    98.714    98.714
+    2     96.429    95.667    95.667    95.635    95.635    98.714    98.714
+    3     95.762    97.571    97.571    97.571    97.571    98.714    98.714
+
+
+		y	f_mr1	f_mr2	f	f_h1	f_h2
+qt=1,	 auc = [96.63%	96.48%	96.48%	96.48%|	96.48%	98.71% ]
+qt=2,	 auc = [96.43%	95.67%	95.67%	95.63%|	95.63%	98.71% ]
+qt=3,	 auc = [95.76%	97.57%	97.57%	97.57%|	97.57%	98.71% ]
+[   2/4] fb_method='rank(v)/rank(f)', log(alpha)=0.00, beta_percentage=5.00%, log(gamma)=-Inf, delta=0.00, fb_num=1, t=2
+progress=1/10 ( 10%) ...progress=10/10 (100%) ...progress=10/10 (100%) ... time=8.31 sec.
+
+T = 
+
+    qt      y       f_mr1     f_mr2       f        f_h1      f_h2      f_h3 
+    __    ______    ______    ______    ______    ______    ______    ______
+
+    1     94.841        95        95        95        95    98.714    98.714
+    2     94.952    95.587    95.587    95.587    95.587    98.714    98.714
+    3     95.667    95.635    95.635    95.635    95.635    98.714    98.714
+
+
+		y	f_mr1	f_mr2	f	f_h1	f_h2
+qt=1,	 auc = [94.84%	95.00%	95.00%	95.00%|	95.00%	98.71% ]
+qt=2,	 auc = [94.95%	95.59%	95.59%	95.59%|	95.59%	98.71% ]
+qt=3,	 auc = [95.67%	95.63%	95.63%	95.63%|	95.63%	98.71% ]
+[   3/4] fb_method='rank(v)/rank(f)', log(alpha)=0.00, beta_percentage=5.00%, log(gamma)=-Inf, delta=0.00, fb_num=5, t=1
+progress=1/10 ( 10%) ...progress=10/10 (100%) ...progress=10/10 (100%) ... time=8.04 sec.
+
+T = 
+
+    qt      y       f_mr1     f_mr2       f        f_h1      f_h2      f_h3 
+    __    ______    ______    ______    ______    ______    ______    ______
+
+    1     96.635    96.476    96.476    96.476    96.476    98.714    98.714
+    2     96.571    94.492    94.492    94.492    94.492    98.714    98.714
+    3      95.19     95.54     95.54    95.571    95.571    98.714    98.714
+
+
+		y	f_mr1	f_mr2	f	f_h1	f_h2
+qt=1,	 auc = [96.63%	96.48%	96.48%	96.48%|	96.48%	98.71% ]
+qt=2,	 auc = [96.57%	94.49%	94.49%	94.49%|	94.49%	98.71% ]
+qt=3,	 auc = [95.19%	95.54%	95.54%	95.57%|	95.57%	98.71% ]
+[   4/4] fb_method='rank(v)/rank(f)', log(alpha)=0.00, beta_percentage=5.00%, log(gamma)=-Inf, delta=0.00, fb_num=5, t=2
+progress=1/10 ( 10%) ...progress=10/10 (100%) ...progress=10/10 (100%) ... time=8.14 sec.
+
+T = 
+
+    qt      y       f_mr1     f_mr2       f        f_h1      f_h2      f_h3 
+    __    ______    ______    ______    ______    ______    ______    ______
+
+    1     94.841        95        95        95        95    98.714    98.714
+    2     94.667    95.048    95.048    95.048    95.048    98.714    98.714
+    3     95.571    96.175    96.175    96.175    96.175    98.714    98.714
+
+
+		y	f_mr1	f_mr2	f	f_h1	f_h2
+qt=1,	 auc = [94.84%	95.00%	95.00%	95.00%|	95.00%	98.71% ]
+qt=2,	 auc = [94.67%	95.05%	95.05%	95.05%|	95.05%	98.71% ]
+qt=3,	 auc = [95.57%	96.17%	96.17%	96.17%|	96.17%	98.71% ]
+
+
+best parameter set: log(alpha)=0.0, beta-percentage=5.00%, log(gamma)=-10.00, delta=0.00, fbppr=1.00
+best result: auc1=95.74%, auc3=96.60%, better_num=2/2
+
+ time_in_total=34 sec., time_each_probe:0.29 sec

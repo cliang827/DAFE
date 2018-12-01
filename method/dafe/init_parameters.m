@@ -2,20 +2,25 @@
 curr_dataset.name = 'viper';
 curr_dataset.source = 'cvpr16_gog_xqda';
 
+ctrl_para.dir_info.result_dir = ['.' slash 'result' slash];
+if ~exist(ctrl_para.dir_info.result_dir, 'dir'), mkdir(ctrl_para.dir_info.result_dir); end
+
 ctrl_para.dir_info.temp_dir = ['.' slash 'temp' slash];
+if ~exist(ctrl_para.dir_info.temp_dir, 'dir'), mkdir(ctrl_para.dir_info.temp_dir); end
 
 ctrl_para.dir_info.data_dir = ['.' slash 'data' slash curr_dataset.name slash];
+if ~exist(ctrl_para.dir_info.data_dir, 'dir'), error('no data file!'); end
+
 ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir slash curr_dataset.source '.mat'];
 data_file = load(ctrl_para.dir_info.data_file);
 
-ctrl_para.dir_info.result_dir = ['.' slash 'result' slash];
 version_str = cellstr(datetime('now','Format','y-MM-d-HH-mm-ss'));
 ctrl_para.dir_info.result_file = sprintf('%s%s-%s.mat', ...
     ctrl_para.dir_info.result_dir, machine_type, version_str{1});
 ctrl_para.dir_info.log_file = [ctrl_para.dir_info.result_file(1:end-4),'.txt'];
 
 ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
-addpath(genpath(fullfile(ctrl_para.dir_info.method_dir))); 
+ 
 
 %% set search ranges of model and experiment parameters
 ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; 
@@ -26,11 +31,16 @@ ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 if debug_flag
     ctrl_para.exp.fb_num_set = [1 5];
     ctrl_para.exp.trial_set = [1 2];
+    ctrl_para.exp.show_progress_flag = true;
+    ctrl_para.exp.show_figure_flag = true;
 else
     ctrl_para.exp.fb_num_set = 1:10;
     ctrl_para.exp.trial_set = 1:10;
+    ctrl_para.exp.show_progress_flag = false;
+    ctrl_para.exp.show_figure_flag = false;
 end
 ctrl_para.exp.tot_query_times = 3; 
+ctrl_para.exp.show_table_flag = true;
 
 ctrl_para.exp.v_sum_constraint = false;
 ctrl_para.exp.include_groundtruth_flag = false;
@@ -38,9 +48,7 @@ ctrl_para.exp.rank_threshold = 20;
 ctrl_para.exp.machine_type = machine_type;
 ctrl_para.exp.run_mode = run_mode;
 ctrl_para.exp.batch_size = batch_size;
-ctrl_para.exp.show_progress_flag = false;
-ctrl_para.exp.show_figure_flag = true;
-ctrl_para.exp.show_table_flag = false;
+
 
 ctrl_para.model.tau = 0.1;                               % used for PCM'14 initialization
 ctrl_para.model.p = 0.9;
@@ -115,6 +123,7 @@ end
 
 
 %% prepare parameters for result analysis
+eval_para.result_file = ctrl_para.dir_info.result_file;
 eval_para.show_figure_flag = ctrl_para.exp.show_figure_flag;
 eval_para.show_table_flag = ctrl_para.exp.show_table_flag;
 eval_para.trial_num = trial_num;

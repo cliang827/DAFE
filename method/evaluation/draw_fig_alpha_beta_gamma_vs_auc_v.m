@@ -1,5 +1,9 @@
 %% figure 2: alpha/beta/gamma vs. auc(f) and mean(v)/std(v)
-hfig = figure(2);
+if show_figure_flag
+    hfig = figure('visible', 'on');
+else
+    hfig = figure('visible', 'off');
+end
 assert(ctrl_para.exp_para.tot_query_times==3);
 
 alpha_auc = alpha_set;
@@ -86,4 +90,4 @@ xlabel('log(\gamma)'); ylabel('std(v)'); title('\gamma-v-std'); grid on;
 legend({'qt=1','qt=2','qt=3'});
 
 saveas(hfig, [result_mat_file(1:end-4), '-fV.fig']);
-if close_figure_flag, close(hfig); end
+if ~show_figure_flag, close(hfig); end

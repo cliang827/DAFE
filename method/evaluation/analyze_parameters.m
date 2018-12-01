@@ -5,11 +5,6 @@ save('./temp/analyze_parameters.mat', 'result_mat_file', 'eval_para');
 % clear
 % clc
 % load('./temp/analyze_parameters.mat');
-% result_mat_file = './result/x270-2018-11-27-02-37-31.mat';
-% result_mat_file = './result/x270-2018-11-27-00-47-23.mat';
-% result_mat_file = './result/pc-2018-11-27-14-38-24.mat';
-% result_mat_file pc-2018-11-27-15-40-15= './result/pc-2018-11-27-16-51-53.mat';
-% result_mat_file = './result/pc-2018-11-27-18-05-44.mat';
 
 load(result_mat_file);
 
@@ -133,7 +128,11 @@ switch filter.column.name_set
         draw_fig_v_vs_beta_gamma_qt;
         
     case 'delta'
-        hfig = figure;
+        if show_figure_flag
+            hfig = figure('visible', 'on');
+        else
+            hfig = figure('visible', 'off');
+        end
         delta_set = ctrl_para.exp.delta_set;
         plot(delta_set, mean(auc_y_kmean,2), 'ko--'); hold on;
         plot(delta_set, mean(auc_f_mr,2), 'bs-.'); hold on;
@@ -143,10 +142,15 @@ switch filter.column.name_set
         xlabel('delta');
         ylabel('auc');
         legend({'y-kmean', 'f-mr', 'f-kmean'}, 'location', 'southeast');
+        saveas(hfig, [result_mat_file(1:end-4), '-delta.fig']);
         if ~show_figure_flag, close(hfig); end
 
     case 'fb_num'
-        hfig = figure;
+        if show_figure_flag
+            hfig = figure('visible', 'on');
+        else
+            hfig = figure('visible', 'off');
+        end
         ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
         ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
         for qt=1:tot_query_times
@@ -181,7 +185,11 @@ switch filter.column.name_set
         if show_table_flag, method_cmp_tab, end
         
         %% method comparison - figure version
-        hfig = figure;
+        if show_figure_flag
+            hfig = figure('visible', 'on');
+        else
+            hfig = figure('visible', 'off');
+        end
         plot(auc_y, 'ko--'); hold on;
         plot(auc_f_mr1, 'bs-.'); hold on;
         plot(auc_f_mr2, 'g^-.'); hold on;
@@ -191,6 +199,7 @@ switch filter.column.name_set
         xlabel('query times');
         ylabel('auc');
         legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'southeast');
+        saveas(hfig, [result_mat_file(1:end-4), '-method_cmp.fig']);
         if ~show_figure_flag, close(hfig); end
         
         %% feedback details - table version
@@ -245,7 +254,11 @@ switch filter.column.name_set
             if show_table_flag, rank_detail_tab, end
 
             %% feedback details - figure version
-            hfig = figure;
+            if show_figure_flag
+                hfig = figure('visible', 'on');
+            else
+                hfig = figure('visible', 'off');
+            end
             suptitle('rank position comparison');
             status_tab = zeros(probe_set_num, tot_query_times, tot_query_times);
             for qti=0:tot_query_times-1
@@ -308,10 +321,15 @@ switch filter.column.name_set
                         same_num, 100*same_num/probe_set_num));
                 end
             end
+            saveas(hfig, [result_mat_file(1:end-4), '-fb_details_pairwise.fig']);
             if ~show_figure_flag, close(hfig); end
 
             %% feedback details - figure version
-            hfig = figure;
+            if show_figure_flag
+                hfig = figure('visible', 'on');
+            else
+                hfig = figure('visible', 'off');
+            end
             edges = 0:10:max_rank;
             init_rank = cell2mat(rank_detail(:,1));
             for qt=1:tot_query_times
@@ -332,6 +350,7 @@ switch filter.column.name_set
                 histogram(rank,edges,'FaceColor', 'blue');
                 xlabel('initial rank'); ylabel('#probes'); title(sprintf('same (qt=%d)',qt));
             end
+            saveas(hfig, [result_mat_file(1:end-4), '-fb_details_histogram.fig']);
             if ~show_figure_flag, close(hfig); end
         end
         

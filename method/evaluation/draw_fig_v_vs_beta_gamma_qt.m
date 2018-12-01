@@ -8,7 +8,11 @@ for i=1:length(alpha_star_ix)
 end
 
 for qt=1:ctrl_para.exp_para.tot_query_times
-    hfig = figure(2+qt);
+    if show_figure_flag
+        hfig = figure('visible', 'on');
+    else
+        hfig = figure('visible', 'off');
+    end
     for i=1:length(alpha_star_ix)
         subplot(beta_num,gamma_num,i); 
 
@@ -29,5 +33,5 @@ for qt=1:ctrl_para.exp_para.tot_query_times
     end
     suptitle(sprintf('qt=%d with best alpha (log(alpha)=%.2f)', qt, log10(alpha(ix_star))));
     saveas(hfig, sprintf('%s-beta-gamma-qt%d.fig',result_mat_file(1:end-4), qt));
-    if close_figure_flag, close(hfig); end
+    if ~show_figure_flag, close(hfig); end
 end

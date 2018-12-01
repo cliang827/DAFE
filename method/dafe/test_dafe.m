@@ -4,6 +4,7 @@ clearvars -except debug_flag run_mode
 clc
 close all
 
+
 init_environment;
 init_parameters;
 
@@ -15,13 +16,13 @@ fprintf(1, 'machine_type=%s, run_mode=%s, debug_flag=%d, version=%s\n', ...
 fprintf(1, 'dataset=%s, probe_set_num=%d, trial_num=%d, tot_query_times=%d\n', ...
     curr_dataset.name, curr_dataset.probe_set_num, trial_num, ctrl_para.exp.tot_query_times);
 
-fprintf(1, 'include_groundtruth_flag=%d, v_sum_constraint_flag=%d\n', ...
+fprintf(1, 'include_groundtruth_flag=%d, v_sum_constraint_flag=%d\n\n', ...
     ctrl_para.exp.include_groundtruth_flag, ctrl_para.exp.v_sum_constraint);
 
-clearvars -except run_mode para_test_set dataset_set ctrl_para_set eval_para
+clearvars -except run_mode para_test_set dataset_set ctrl_para_set eval_para 
 
 %%
-result_file = ctrl_para_set{1}.dir_info.result_file;
+result_file = eval_para.result_file;
 para_test_num = size(para_test_set,1);
 auc_score = cell(1, para_test_num);
 difficulty_score = cell(1, para_test_num);
@@ -62,5 +63,4 @@ switch run_mode
             time_in_parallel, time_in_serial, time_each_probe);
 end
 diary off;
-
 
