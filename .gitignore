@@ -1,3 +1,10 @@
 # Matlab
+/data
+/temp
+/result
 *.mat
 *.fig
+*.txt
+*.m~
+*.sh~
+*.log~

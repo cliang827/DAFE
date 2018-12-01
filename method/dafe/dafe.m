@@ -1,4 +1,4 @@
-function [reid_score, difficulty_score, suggest_feedback_id_tab, time_result] = ...
+function [reid_score, difficulty_score, auc_score, suggest_feedback_id_tab, time_result] = ...
     dafe(dataset, ctrl_para)
 % save('./temp/dafe.mat', 'dataset', 'ctrl_para');
 
@@ -6,18 +6,17 @@ function [reid_score, difficulty_score, suggest_feedback_id_tab, time_result] = 
 % clc
 % load('./temp/dafe.mat');
 
-alpha = ctrl_para.dafe.alpha;
-beta_percentage = ctrl_para.dafe.beta_percentage;
-gamma = ctrl_para.dafe.gamma;
-delta = ctrl_para.dafe.delta;
+alpha = ctrl_para.model.alpha;
+beta_percentage = ctrl_para.model.beta_percentage;
+gamma = ctrl_para.model.gamma;
+delta = ctrl_para.model.delta;
 
-show_progress_flag = ctrl_para.exp_para.show_progress_flag;
-show_table_flag = ctrl_para.exp_para.show_table_flag;
+show_progress_flag = ctrl_para.exp.show_progress_flag;
+tot_query_times = ctrl_para.exp.tot_query_times;
 
-tot_query_times = ctrl_para.exp_para.tot_query_times;
-probe_set_num = ctrl_para.dataset.probe_set_num;
-gallery_set_num = ctrl_para.dataset.gallery_set_num;
-node_set_num = ctrl_para.dataset.node_set_num;
+probe_set_num = dataset.probe_set_num;
+gallery_set_num = dataset.gallery_set_num;
+node_set_num = dataset.node_set_num;
 
 
 robot_feedback_score = dataset.robot_feedback_score;
@@ -116,16 +115,16 @@ for i=1:probe_set_num
         model_para.gamma = gamma;
 
         % others parameters
-        model_para.p = ctrl_para.dafe.p;
-        model_para.regu_method = ctrl_para.dafe.regu_method;
-        model_para.v_sum_constraint_flag = ctrl_para.exp_para.v_sum_constraint;
-        model_para.expected_feedback_num = ctrl_para.exp_para.fbppr;
+        model_para.p = ctrl_para.model.p;
+        model_para.regu_method = ctrl_para.model.regu_method;
+        model_para.expected_feedback_num = ctrl_para.model.fb_num;
+        model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
         model_para.labeled_gallery_set = labeled_gallery_set;
         model_para.unlabeled_gallery_set = unlabeled_gallery_set;
-        model_para.node_set_num = ctrl_para.dataset.node_set_num;
+        model_para.node_set_num = dataset.node_set_num;
         
         [f, v, f_mr, f_history] = solve_fv(f0, v0, y0, W, model_para);
-
+        y = f0; y(labeled_gallery_set) = feedback_scores; y(end) = [];
 
         %% result collection
         reid_score_f_mr1(:,i,query_times) = f_mr(1:gallery_set_num,1);
@@ -134,7 +133,7 @@ for i=1:probe_set_num
         reid_score_f_h2(:,i,query_times) = squeeze(f_history(1:gallery_set_num,2));
         reid_score_f_h3(:,i,query_times) = squeeze(f_history(1:gallery_set_num,3));
         reid_score_f(:,i,query_times) = squeeze(f(1:gallery_set_num));
-        reid_score_y(:,i,query_times) = squeeze(y0(1:gallery_set_num));
+        reid_score_y(:,i,query_times) = squeeze(y(1:gallery_set_num));
         difficulty_score(:,i,query_times) = v(1:gallery_set_num);
 
         
@@ -146,7 +145,7 @@ for i=1:probe_set_num
             generate_feedback_suggestion(curr_reid_score, curr_difficulty_score, ...
             labeled_gallery_set, gallery_name_tab, ctrl_para);
 
-        if ctrl_para.exp_para.include_groundtruth_flag
+        if ctrl_para.exp.include_groundtruth_flag
             [suggest_feedback_id_tab{i,query_times}, suggest_feedback_name_tab{i,query_times}] = ...
                 check_groundtruth_id(curr_reid_score, i, query_times, gallery_name_tab, ...
                 suggest_feedback_id_tab(i,:), suggest_feedback_name_tab(i,:), ctrl_para);
@@ -158,54 +157,53 @@ for i=1:probe_set_num
     if show_progress_flag && mod(i,10)==9
         fprintf(1, repmat('\b', 1, nchar));
     end
-end
-
-
-reid_score.f_mr1 = reid_score_f_mr1;
-reid_score.f_mr2 = reid_score_f_mr2;
-reid_score.f_h1 = reid_score_f_h1;
-reid_score.f_h2 = reid_score_f_h2;
-reid_score.f_h3 = reid_score_f_h3;
-reid_score.f = reid_score_f;
-reid_score.y = reid_score_y;
-       
+end    
 time_result.time_by_round = mean(query_time_tab,1);
 time_result.time_in_total = sum(query_time_tab(:));
 
 %%
-auc_result_f_mr1 = zeros(1, tot_query_times);
-auc_result_f_mr2 = zeros(1, tot_query_times);
-auc_result_f = zeros(1, tot_query_times);
-auc_result_f_h1 = zeros(1, tot_query_times);
-auc_result_f_h2 = zeros(1, tot_query_times);
-auc_result_f_h3 = zeros(1, tot_query_times);
-auc_result_y = zeros(1, tot_query_times);
+reid_score.y = reid_score_y;
+reid_score.f = reid_score_f;
+
+auc_score_y = zeros(1, tot_query_times);
+auc_score_f_mr1 = zeros(1, tot_query_times);
+auc_score_f_mr2 = zeros(1, tot_query_times);
+auc_score_f = zeros(1, tot_query_times);
+auc_score_f_h1 = zeros(1, tot_query_times);
+auc_score_f_h2 = zeros(1, tot_query_times);
+auc_score_f_h3 = zeros(1, tot_query_times);
 groundtruth_rank = repmat(1:probe_set_num, gallery_set_num, 1);
 
 for query_times = 1:tot_query_times
 
-    [~, auc_result_f_mr1(1, query_times)] = ...
+    [~, auc_score_f_mr1(1, query_times)] = ...
         result_evaluation(reid_score_f_mr1(:,:,query_times), groundtruth_rank);
     
-    [~, auc_result_f_mr2(1, query_times)] = ...
+    [~, auc_score_f_mr2(1, query_times)] = ...
         result_evaluation(reid_score_f_mr2(:,:,query_times), groundtruth_rank);
     
-    [~, auc_result_f_h1(1, query_times)] = ...
+    [~, auc_score_f_h1(1, query_times)] = ...
         result_evaluation(reid_score_f_h1(:,:,query_times), groundtruth_rank);
     
-    [~, auc_result_f_h2(1, query_times)] = ...
+    [~, auc_score_f_h2(1, query_times)] = ...
         result_evaluation(reid_score_f_h2(:,:,query_times), groundtruth_rank);
     
-    [~, auc_result_f_h3(1, query_times)] = ...
+    [~, auc_score_f_h3(1, query_times)] = ...
         result_evaluation(reid_score_f_h3(:,:,query_times), groundtruth_rank);
     
-    [~, auc_result_f(1, query_times)] = ...
+    [~, auc_score_f(1, query_times)] = ...
         result_evaluation(reid_score_f(:,:,query_times), groundtruth_rank);
 
-    [~, auc_result_y(1, query_times)] = ...
+    [~, auc_score_y(1, query_times)] = ...
         result_evaluation(reid_score_y(:,:,query_times), groundtruth_rank);
 end
-
+auc_score.y = auc_score_y;
+auc_score.f_mr1 = auc_score_f_mr1;
+auc_score.f_mr2 = auc_score_f_mr2;
+auc_score.f = auc_score_f;
+auc_score.f_h1 = auc_score_f_h1;
+auc_score.f_h2 = auc_score_f_h2;
+auc_score.f_h3 = auc_score_f_h3;
 
 %%
 if show_progress_flag
@@ -214,20 +212,20 @@ if show_progress_flag
     
     
     qt = [1:tot_query_times]';
-    y = 100*auc_result_y';
-    f_mr1 = 100*auc_result_f_mr1';
-    f_mr2 = 100*auc_result_f_mr2';
-    f = 100*auc_result_f';
-    f_h1 = 100*auc_result_f_h1';
-    f_h2 = 100*auc_result_f_h2';
-    f_h3 = 100*auc_result_f_h3';
+    y = 100*auc_score_y';
+    f_mr1 = 100*auc_score_f_mr1';
+    f_mr2 = 100*auc_score_f_mr2';
+    f = 100*auc_score_f';
+    f_h1 = 100*auc_score_f_h1';
+    f_h2 = 100*auc_score_f_h2';
+    f_h3 = 100*auc_score_f_h3';
     T = table(qt,y,f_mr1,f_mr2,f,f_h1,f_h2,f_h3)
     
 
     for qt = 1:tot_query_times
         if qt==1, fprintf('\n\t\ty\tf_mr1\tf_mr2\tf\tf_h1\tf_h2\n'); end
         fprintf(1, 'qt=%d,\t auc = [%.2f%%\t%.2f%%\t%.2f%%\t%.2f%%|\t%.2f%%\t%.2f%% ]\n', ...
-            qt, 100*auc_result_y(qt), 100*auc_result_f_mr1(qt),  100*auc_result_f_mr2(qt), ...
-            100*auc_result_f(qt), 100*auc_result_f_h1(qt), 100*auc_result_f_h2(qt));
+            qt, 100*auc_score_y(qt), 100*auc_score_f_mr1(qt),  100*auc_score_f_mr2(qt), ...
+            100*auc_score_f(qt), 100*auc_score_f_h1(qt), 100*auc_score_f_h2(qt));
     end
 end

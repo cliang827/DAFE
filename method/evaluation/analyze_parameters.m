@@ -1,26 +1,24 @@
-% function [time_total, time_each_probe] = analyze_parameters(result_mat_file, ctrl_para)
-% save('./temp/analyze_parameters.mat', 'result_mat_file');
+function [time_total, time_each_probe] = analyze_parameters(result_mat_file, eval_para)
+save('./temp/analyze_parameters.mat', 'result_mat_file', 'eval_para');
 
 % close all
-clear
-clc
+% clear
+% clc
 % load('./temp/analyze_parameters.mat');
-% result_mat_file = './result/x270-2018-11-27-02-37-31.mat';
-% result_mat_file = './result/x270-2018-11-27-00-47-23.mat';
-% result_mat_file = './result/pc-2018-11-27-14-38-24.mat';
-result_mat_file pc-2018-11-27-15-40-15= './result/pc-2018-11-27-16-51-53.mat';
-% result_mat_file = './result/pc-2018-11-27-18-05-44.mat';
 
 load(result_mat_file);
-show_figure_flag = true; %ctrl_para.exp_para.show_figure_flag;
-show_table_flag = ctrl_para.exp_para.show_table_flag;
 
-trial_num = ctrl_para.exp_para.trial_num;
-v_sum_constraint = ctrl_para.exp_para.v_sum_constraint;
-tot_query_times = ctrl_para.exp_para.tot_query_times;
-probe_set_num = ctrl_para.dataset.probe_set_num;
-gallery_set_num = ctrl_para.dataset.gallery_set_num;
-groundtruth_rank = repmat(1:probe_set_num, gallery_set_num, 1);
+show_figure_flag = eval_para.show_figure_flag;
+show_table_flag = eval_para.show_table_flag;
+trial_num = eval_para.trial_num;
+% v_sum_constraint = eval_para.v_sum_constraint;
+tot_query_times = eval_para.tot_query_times;
+probe_set_num = eval_para.probe_set_num;
+gallery_set_num = eval_para.gallery_set_num;
+% machine_type = eval_para.machine_type; 
+fb_num_set = eval_para.fb_num_set;
+data_file = eval_para.data_file;
+
 
 feedback_method = para_test_set{1,1};
 paras = cell2mat(para_test_set(:,2:6));
@@ -28,15 +26,13 @@ paras_num = size(paras,1);
 if trial_num>1
     paras = unique(paras,'rows');
     paras_num = paras_num/trial_num;
-    reid_score = reshape(reid_score, trial_num, paras_num)';
+    auc_score = reshape(auc_score, trial_num, paras_num)';
     difficulty_score = reshape(difficulty_score, trial_num, paras_num)';
     feedback_id = reshape(feedback_id, trial_num, paras_num)';
     time_result = reshape(time_result, trial_num, paras_num)';
 end
     
-    
-    
-    
+
 auc_f_mr1_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_mr2_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_h1_temp = zeros(paras_num,tot_query_times,trial_num);
@@ -66,15 +62,13 @@ for i=1:paras_num
         time_total = time_total+time_result{i,t}.time_in_total;
         time_round_temp(i,:,t) = time_result{i,t}.time_by_round;
         
-        for qt=1:tot_query_times
-            [~, auc_y_temp(i,qt,t)] = result_evaluation(reid_score{i}.y(:,:,qt), groundtruth_rank);
-            [~, auc_f_mr1_temp(i,qt,t)] = result_evaluation(reid_score{i}.f_mr1(:,:,qt), groundtruth_rank);
-            [~, auc_f_mr2_temp(i,qt,t)] = result_evaluation(reid_score{i}.f_mr2(:,:,qt), groundtruth_rank);
-            [~, auc_f_temp(i,qt,t)] = result_evaluation(reid_score{i}.f(:,:,qt), groundtruth_rank);
-            [~, auc_f_h1_temp(i,qt,t)] = result_evaluation(reid_score{i}.f_h1(:,:,qt), groundtruth_rank);
-            [~, auc_f_h2_temp(i,qt,t)] = result_evaluation(reid_score{i}.f_h2(:,:,qt), groundtruth_rank);
-            [~, auc_f_h3_temp(i,qt,t)] = result_evaluation(reid_score{i}.f_h3(:,:,qt), groundtruth_rank);
-        end
+        auc_y_temp(i,:,t) = auc_score{i,t}.y;
+        auc_f_mr1_temp(i,:,t) = auc_score{i,t}.f_mr1;
+        auc_f_mr2_temp(i,:,t) = auc_score{i,t}.f_mr2;
+        auc_f_temp(i,:,t) = auc_score{i,t}.f;
+        auc_f_h1_temp(i,:,t) = auc_score{i,t}.f_h1;
+        auc_f_h2_temp(i,:,t) = auc_score{i,t}.f_h2;
+        auc_f_h3_temp(i,:,t) = auc_score{i,t}.f_h3;
 
         v = squeeze(mean(difficulty_score{i,t},2)); %mean for all probes
         v_max_temp(i,:,t) = max(v);
@@ -98,7 +92,7 @@ end
 time_each_probe = time_total/(paras_num*tot_query_times*probe_set_num*trial_num);
 
 %% filter
-filter.column.name_set = 'fbppr'; %'feedback_method'; %'alpha-beta-gamma', 'fbppr';
+filter.column.name_set = 'fb_num'; %'feedback_method'; %'alpha-beta-gamma', 'fb_num';
 filter.row.alpha_set = 10.^(0);
 filter.row.beta_set = 0.05;
 [paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, v_max, v_mean, v_std] = ...
@@ -116,9 +110,7 @@ fbppr = paras(:,5);
 %%
 result = cat(2, paras, auc_f(:,1), auc_f(:,tot_query_times));
 [~, ix_star] = max(result(:,end));
-fprintf(1, '\n\nfeedback_method=''%s'' | v_sum_constraint_flag=%d | machine_type=''%s''\n', ...
-    feedback_method, v_sum_constraint, ctrl_para.exp_para.machine_type);
-fprintf(1, 'best parameter set: log(alpha)=%.1f, beta-percentage=%.2f%%, log(gamma)=%.2f, delta=%.2f, fbppr=%.2f\n', ...
+fprintf(1, '\n\nbest parameter set: log(alpha)=%.1f, beta-percentage=%.2f%%, log(gamma)=%.2f, delta=%.2f, fbppr=%.2f\n', ...
     alpha(ix_star), 100*beta(ix_star), gamma(ix_star), delta(ix_star), fbppr(ix_star));
 fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
     100*auc_f(ix_star,1), tot_query_times, 100*auc_f(ix_star,tot_query_times), ...
@@ -136,8 +128,12 @@ switch filter.column.name_set
         draw_fig_v_vs_beta_gamma_qt;
         
     case 'delta'
-        hfig = figure;
-        delta_set = ctrl_para.exp_para.delta_set;
+        if show_figure_flag
+            hfig = figure('visible', 'on');
+        else
+            hfig = figure('visible', 'off');
+        end
+        delta_set = ctrl_para.exp.delta_set;
         plot(delta_set, mean(auc_y_kmean,2), 'ko--'); hold on;
         plot(delta_set, mean(auc_f_mr,2), 'bs-.'); hold on;
         plot(delta_set, mean(auc_f,2), 'r*-'); hold on; grid on;
@@ -146,27 +142,32 @@ switch filter.column.name_set
         xlabel('delta');
         ylabel('auc');
         legend({'y-kmean', 'f-mr', 'f-kmean'}, 'location', 'southeast');
+        saveas(hfig, [result_mat_file(1:end-4), '-delta.fig']);
         if ~show_figure_flag, close(hfig); end
 
-    case 'fbppr'
-        hfig = figure;
-        fbppr_set = ctrl_para.exp_para.fbppr_set;
+    case 'fb_num'
+        if show_figure_flag
+            hfig = figure('visible', 'on');
+        else
+            hfig = figure('visible', 'off');
+        end
         ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
         ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
         for qt=1:tot_query_times
             subplot(1,tot_query_times, qt);
-            plot(fbppr_set, auc_y(:,qt), 'ko--'); hold on;
-            plot(fbppr_set, auc_f_mr1(:,qt), 'bs-.'); hold on;
-            plot(fbppr_set, auc_f_mr1(:,qt), 'gs-.'); hold on;
-            plot(fbppr_set, auc_f(:,qt), 'r*-'); hold on; grid on;
+            plot(fb_num_set, auc_y(:,qt), 'ko--'); hold on;
+            plot(fb_num_set, auc_f_mr1(:,qt), 'bs-.'); hold on;
+            plot(fb_num_set, auc_f_mr1(:,qt), 'gs-.'); hold on;
+            plot(fb_num_set, auc_f(:,qt), 'r*-'); hold on; grid on;
             axis([-Inf Inf ymin ymax]);
-            set(gca, 'xtick', fbppr_set);
-            set(gca,'xticklabel',num2cell(fbppr_set));
-            xlabel('fbppr');
+            set(gca, 'xtick', fb_num_set);
+            set(gca,'xticklabel',num2cell(fb_num_set));
+            xlabel('fb\_num');
             ylabel('auc');
             legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
             title(sprintf('qt=%d',qt));
         end
+        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
         if ~show_figure_flag, close(hfig); end
         
     case 'feedback_method'
@@ -184,7 +185,11 @@ switch filter.column.name_set
         if show_table_flag, method_cmp_tab, end
         
         %% method comparison - figure version
-        hfig = figure;
+        if show_figure_flag
+            hfig = figure('visible', 'on');
+        else
+            hfig = figure('visible', 'off');
+        end
         plot(auc_y, 'ko--'); hold on;
         plot(auc_f_mr1, 'bs-.'); hold on;
         plot(auc_f_mr2, 'g^-.'); hold on;
@@ -194,6 +199,7 @@ switch filter.column.name_set
         xlabel('query times');
         ylabel('auc');
         legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'southeast');
+        saveas(hfig, [result_mat_file(1:end-4), '-method_cmp.fig']);
         if ~show_figure_flag, close(hfig); end
         
         %% feedback details - table version
@@ -201,6 +207,7 @@ switch filter.column.name_set
             % LC: for condition of only one set of parameters!
             rank_detail = cell(probe_set_num, 2*tot_query_times+1);
             tab_column_name = cell(1, 2*tot_query_times+1);
+            groundtruth_rank = repmat(1:probe_set_num, gallery_set_num, 1);
             for qt=1:tot_query_times
                 if qt==1
                     [~, ~, temp] = result_evaluation(reid_score{1,1}.y(:,:,qt), groundtruth_rank); 
@@ -223,7 +230,7 @@ switch filter.column.name_set
             tab_column_name{1,end} = 'improvement';
 
             tab_row_name = cell(probe_set_num,1);
-            data_file = load(ctrl_para.dir_info.data_file);
+            data_file = load(data_file);
             robot_feedback_score = data_file.feedback_score_set{1};
             for i=1:probe_set_num
                 tab_row_name{i} = num2str(i);
@@ -247,7 +254,11 @@ switch filter.column.name_set
             if show_table_flag, rank_detail_tab, end
 
             %% feedback details - figure version
-            hfig = figure;
+            if show_figure_flag
+                hfig = figure('visible', 'on');
+            else
+                hfig = figure('visible', 'off');
+            end
             suptitle('rank position comparison');
             status_tab = zeros(probe_set_num, tot_query_times, tot_query_times);
             for qti=0:tot_query_times-1
@@ -278,12 +289,24 @@ switch filter.column.name_set
                     set(gca,'xticklabel',num2cell(axis_range));
                     set(gca,'ytick', axis_range);
                     set(gca,'yticklabel',num2cell(axis_range));
-                    if exist('plot_blue','var')
+                    if exist('plot_red','var') && exist('plot_green','var') && exist('plot_blue','var')
                         legend([plot_red(1), plot_green(1), plot_blue(1)], ...
                             {'worse','better','same'},'Location','northwest');
-                    else
+                    elseif exist('plot_red','var') && exist('plot_blue','var')
+                        legend([plot_red(1), plot_blue(1)], ...
+                            {'worse','same'},'Location','northwest');
+                    elseif exist('plot_red','var') && exist('plot_green','var')
                         legend([plot_red(1), plot_green(1)], ...
                             {'worse','better'},'Location','northwest');
+                    elseif exist('plot_green','var') && exist('plot_blue','var')
+                        legend([plot_red(1), plot_green(1)], ...
+                            {'better','same'},'Location','northwest');
+                    elseif exist('plot_red','var')
+                        legend(plot_red(1), {'worse'},'Location','northwest');
+                    elseif exist('plot_green','var')
+                        legend(plot_green(1), {'better'},'Location','northwest');
+                    elseif exist('plot_blue','var')
+                        legend(plot_blue(1), {'same'},'Location','northwest');
                     end
 
                     if qti==0
@@ -298,10 +321,15 @@ switch filter.column.name_set
                         same_num, 100*same_num/probe_set_num));
                 end
             end
+            saveas(hfig, [result_mat_file(1:end-4), '-fb_details_pairwise.fig']);
             if ~show_figure_flag, close(hfig); end
 
             %% feedback details - figure version
-            hfig = figure;
+            if show_figure_flag
+                hfig = figure('visible', 'on');
+            else
+                hfig = figure('visible', 'off');
+            end
             edges = 0:10:max_rank;
             init_rank = cell2mat(rank_detail(:,1));
             for qt=1:tot_query_times
@@ -322,6 +350,7 @@ switch filter.column.name_set
                 histogram(rank,edges,'FaceColor', 'blue');
                 xlabel('initial rank'); ylabel('#probes'); title(sprintf('same (qt=%d)',qt));
             end
+            saveas(hfig, [result_mat_file(1:end-4), '-fb_details_histogram.fig']);
             if ~show_figure_flag, close(hfig); end
         end
         
