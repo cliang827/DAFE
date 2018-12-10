@@ -74,7 +74,6 @@ for i=1:probe_set_num
 
         %% prepare parameters for DAFE
         % parameter: f0
-        
         if 1==query_times
             f0 = W(:,end); f0(end) = 1;
             f0(1:end) = normalization(f0(1:end), [-1 1], 0, 'range-priority');
@@ -84,7 +83,7 @@ for i=1:probe_set_num
         
         % parameter: v0
         v0 = zeros(node_set_num,1);
-        v0(unlabeled_gallery_set) = delta*ones(nu, 1); 
+        v0(unlabeled_gallery_set) = delta; 
         v0(labeled_gallery_set) = zeros(nl,1);
 
         % parameter: y0
@@ -95,7 +94,7 @@ for i=1:probe_set_num
         temp = zeros(node_set_num,1);
         temp(unlabeled_gallery_set) = nl/nu;
         temp(labeled_gallery_set) = 1;
-        model_para.alpha = alpha*temp;
+        model_para.alpha = temp;
 
         % parameter: beta
         P = diag(sum(W,2));

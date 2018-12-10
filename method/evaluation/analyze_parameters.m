@@ -1,11 +1,11 @@
-function [time_total, time_each_probe] = analyze_parameters(result_mat_file, eval_para)
-save('./temp/analyze_parameters.mat', 'result_mat_file', 'eval_para');
+function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
+save('./temp/analyze_parameters.mat', 'result_mat_file');
 
 % close all
 % clear
 % clc
 % load('./temp/analyze_parameters.mat');
-
+% result_mat_file = './result/mmap-pc-2018-12-4-12-24-36.mat';
 load(result_mat_file);
 
 show_figure_flag = eval_para.show_figure_flag;
@@ -31,7 +31,6 @@ if trial_num>1
     feedback_id = reshape(feedback_id, trial_num, paras_num)';
     time_result = reshape(time_result, trial_num, paras_num)';
 end
-    
 
 auc_f_mr1_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_mr2_temp = zeros(paras_num,tot_query_times,trial_num);
@@ -90,11 +89,13 @@ for i=1:paras_num
     
 end
 time_each_probe = time_total/(paras_num*tot_query_times*probe_set_num*trial_num);
+clearvars auc_score difficulty_score time_result
+clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_temp
+clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
 filter.column.name_set = 'fb_num'; %'feedback_method'; %'alpha-beta-gamma', 'fb_num';
-filter.row.alpha_set = 10.^(0);
-filter.row.beta_set = 0.05;
+filter.row.alpha_set = 1;
 [paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, v_max, v_mean, v_std] = ...
     para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, v_max, v_mean, v_std, filter);
 
@@ -141,6 +142,32 @@ switch filter.column.name_set
         saveas(hfig, [result_mat_file(1:end-4), '-delta.fig']);
         if ~show_figure_flag, close(hfig); end
 
+    case 'alpha-fb_num'
+        hfig = figure;
+        ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
+        ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
+        alpha_set = unique(alpha);
+        alpha_num = length(alpha_set);
+        for i = 1:alpha_num
+            ix = find(alpha==alpha_set(i));
+            for qt=1:tot_query_times
+                subplot(alpha_num,tot_query_times,(i-1)*tot_query_times+qt);
+                plot(fb_num_set, auc_y(ix,qt), 'ko--'); hold on;
+                plot(fb_num_set, auc_f_mr1(ix,qt), 'bs-.'); hold on;
+                plot(fb_num_set, auc_f_mr1(ix,qt), 'gs-.'); hold on;
+                plot(fb_num_set, auc_f(ix,qt), 'r*-'); hold on; grid on;
+                axis([-Inf Inf ymin ymax]);
+                set(gca, 'xtick', fb_num_set);
+                set(gca,'xticklabel',num2cell(fb_num_set));
+                xlabel('fb\_num');
+                ylabel('auc');
+                legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
+                title(sprintf('qt=%d',qt));
+            end
+        end
+        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
+        if ~show_figure_flag, close(hfig); end
+        
     case 'fb_num'
         hfig = figure;
         ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
@@ -161,6 +188,25 @@ switch filter.column.name_set
         end
         saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
         if ~show_figure_flag, close(hfig); end
+        
+        hfig = figure;
+        line_type = {'gs--', 'b^-.', 'r*-'};
+        plot(fb_num_set, auc_y(:,1), 'ko-','linewidth',5); hold on; grid on;
+        for qt=1:tot_query_times
+            plot(fb_num_set, auc_f(:,qt), line_type{qt},'linewidth',5); hold on; 
+        end
+        axis([-Inf Inf ymin ymax]);
+        font_size = 30;
+        set(gca, 'xtick', fb_num_set);
+        set(gca,'xticklabel',num2cell(fb_num_set),'fontsize',font_size);
+        xlabel('fb\_num','fontsize',font_size);
+        ylabel('auc','fontsize',font_size);
+        legend({'init.', 'qt=1', 'qt=2', 'qt=3'}, ...
+            'location', 'northwest','fontsize',font_size);
+        title(feedback_method);
+        saveas(hfig, [result_mat_file(1:end-4), '-fb_num_one_figure.fig']);
+        if ~show_figure_flag, close(hfig); end
+        
         
     case 'feedback_method'
         %% method comparison - table version

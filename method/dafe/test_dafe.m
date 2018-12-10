@@ -1,12 +1,15 @@
 function test_dafe(debug_flag, run_mode)
 
+debug_flag = 1; 
+run_mode = 'serial';
+
 clearvars -except debug_flag run_mode
 clc
 close all
 
-
 init_environment;
 init_parameters;
+
 
 diary([ctrl_para.dir_info.log_file(1:end-4),'.txt']); diary on;
 
@@ -24,10 +27,11 @@ clearvars -except run_mode para_test_set dataset_set ctrl_para_set eval_para
 %%
 result_file = eval_para.result_file;
 para_test_num = size(para_test_set,1);
-auc_score = cell(1, para_test_num);
-difficulty_score = cell(1, para_test_num);
-feedback_id = cell(1, para_test_num);
-time_result = cell(1, para_test_num);
+reid_score = cell(para_test_num,1);
+auc_score = cell(para_test_num,1);
+difficulty_score = cell(para_test_num,1);
+feedback_id = cell(para_test_num,1);
+time_result = cell(para_test_num,1);
 switch run_mode
     case 'serial'
         for i=1:para_test_num
@@ -39,10 +43,11 @@ switch run_mode
 
             [reid_score{i}, difficulty_score{i}, auc_score{i}, feedback_id{i}, time_result{i}] = ...
                 dafe(dataset_set{i}, ctrl_para_set{i});
+            
         end
-        save(result_file, 'para_test_set', 'reid_score', 'difficulty_score', ...
+        save(result_file, 'para_test_set', 'eval_para', 'reid_score', 'difficulty_score', ...
             'auc_score', 'feedback_id', 'time_result', '-v7.3');
-        [time_in_total, time_each_probe] = analyze_parameters(result_file, eval_para);
+        [time_in_total, time_each_probe] = analyze_parameters(result_file);
         fprintf(1, '\n time_in_total=%.0f sec., time_each_probe:%.2f sec\n', ...
             time_in_total, time_each_probe);
         
@@ -55,10 +60,10 @@ switch run_mode
         if ~isempty(gcp('nocreate'))>0
             delete(gcp('nocreate'))
         end
-        save(result_file, 'para_test_set', 'reid_score', 'difficulty_score', ...
-            'auc_score', 'feedback_id', 'time_result', '-v7.3');
         time_in_parallel = toc(t_start);
-        [time_in_serial, time_each_probe] = analyze_parameters(result_file, eval_para);
+        save(result_file, 'para_test_set', 'eval_para', 'reid_score', 'difficulty_score', ...
+            'auc_score', 'feedback_id', 'time_result', 'time_in_parallel', '-v7.3');
+        [time_in_serial, time_each_probe] = analyze_parameters(result_file);
         fprintf(1, '\n time_in_parallel=%.0f sec, time_in_total_serial=%.0f sec., time_each_probe:%.2f sec\n', ...
             time_in_parallel, time_in_serial, time_each_probe);
 end

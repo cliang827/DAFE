@@ -23,23 +23,24 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
  
 
 %% set search ranges of model and experiment parameters
-ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; 
-ctrl_para.exp.alpha_set = 10.^(0); %10.^(-1:0.5:1);
+ctrl_para.exp.fb_method_set = {'top-k-v'}; 
+ctrl_para.exp.alpha_set = 10.^(0); %10.^(0);
 ctrl_para.exp.beta_percentage_set = 0.05; %[0.05 0.1 0.5 1]; 
 ctrl_para.exp.gamma_set = 0; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 if debug_flag
-    ctrl_para.exp.fb_num_set = [1 5];
-    ctrl_para.exp.trial_set = [1 2];
+    ctrl_para.exp.fb_num_set = [10];
+    ctrl_para.exp.trial_set = [1];
+    ctrl_para.exp.tot_query_times = 3; 
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
 else
-    ctrl_para.exp.fb_num_set = 1:10;
-    ctrl_para.exp.trial_set = 1:10;
+    ctrl_para.exp.fb_num_set = 1:2:10;
+    ctrl_para.exp.trial_set = 1:2:10;
+    ctrl_para.exp.tot_query_times = 3; 
     ctrl_para.exp.show_progress_flag = false;
     ctrl_para.exp.show_figure_flag = false;
 end
-ctrl_para.exp.tot_query_times = 3; 
 ctrl_para.exp.show_table_flag = true;
 
 ctrl_para.exp.v_sum_constraint = false;
@@ -114,7 +115,9 @@ for i=1:para_test_num
     curr_dataset.g2g_dist = data_file.g2g_dist(new_gallery_ix_set, new_gallery_ix_set);
     curr_dataset.g2p_dist = data_file.g2p_dist(new_gallery_ix_set, new_probe_ix_set);
     [curr_dataset.gallery_set_num, curr_dataset.probe_set_num] = size(curr_dataset.g2p_dist);
-    if debug_flag, curr_dataset.probe_set_num = 10; end        
+    if debug_flag
+        curr_dataset.probe_set_num = 10; 
+    end        
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     curr_dataset.gallery_name_tab = data_file.allimagenames(gallery_ix_set);
     curr_dataset.robot_feedback_score = data_file.feedback_score_set{t};

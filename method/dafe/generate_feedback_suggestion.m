@@ -4,7 +4,7 @@ function [id_tab, name_tab] = generate_feedback_suggestion(f, v, labeled_gallery
 % clear
 % clc
 % load('./temp/suggest_feedback_list.mat');
-
+rank_threshold = ctrl_para.exp.rank_threshold;
 fb_num = ctrl_para.model.fb_num;
 fb_method = ctrl_para.model.fb_method;
 gallery_set_num = length(f);
@@ -15,13 +15,16 @@ f = (1+f)/2; % normalize f to [0,1] so that it has the same range as v
 labeled_gallery_ix(labeled_gallery_ix==(gallery_set_num+1)) = [];
 nl = length(labeled_gallery_ix);
 if nl>0
-    f(labeled_gallery_ix) = -1*ones(nl,1);
+    f(labeled_gallery_ix) = 0;
 end
 [~, ix] = sort(f, 'descend');
 [~, rank_f] = sort(ix);
 
 feedback_score = zeros(size(f));
 switch fb_method
+    case 'top-k-v'
+        feedback_score(ix(1:rank_threshold)) = v(ix(1:rank_threshold));
+
     case 'v-only'
         feedback_score = v;
 
@@ -47,7 +50,7 @@ end
 epsilon = 1e-3;
 %% this trick is to kept ix result output by different machines are the same
 if a(1)<=1 && length(find(a>1-epsilon))>fb_num
-    rng(K); 
+    rng(1); 
     little_disturbance = rand(316,1)*epsilon;
     [~, ix] = sort(feedback_score+little_disturbance, 'descend');
 end

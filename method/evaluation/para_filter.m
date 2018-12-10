@@ -24,34 +24,36 @@ function [paras_filtered, auc_y_filtered, auc_f_mr1_filtered, auc_f_mr2_filtered
 
 %% row filter
 invalid_para_ix = zeros(size(paras,1),1);
-if isfield(filter.row, 'alpha_set')
-    invalid_alpha_set = setdiff(unique(paras(:,1)),filter.row.alpha_set);
-    for i=1:length(invalid_alpha_set)
-        invalid_para_ix(paras(:,1)==invalid_alpha_set(i))=1;    
+if isfield(filter, 'row') 
+    if isfield(filter.row, 'alpha_set')
+        invalid_alpha_set = setdiff(unique(paras(:,1)),filter.row.alpha_set);
+        for i=1:length(invalid_alpha_set)
+            invalid_para_ix(paras(:,1)==invalid_alpha_set(i))=1;    
+        end
     end
-end
-if isfield(filter.row, 'beta_set')
-    invalid_beta_set = setdiff(unique(paras(:,2)),filter.row.beta_set);
-    for i=1:length(invalid_beta_set)
-        invalid_para_ix(paras(:,2)==invalid_beta_set(i))=1;
+    if isfield(filter.row, 'beta_set')
+        invalid_beta_set = setdiff(unique(paras(:,2)),filter.row.beta_set);
+        for i=1:length(invalid_beta_set)
+            invalid_para_ix(paras(:,2)==invalid_beta_set(i))=1;
+        end
     end
-end
-if isfield(filter.row, 'gamma_set')
-    invalid_gamma_set = setdiff(unique(paras(:,3)),filter.row.gamma_set);
-    for i=1:length(invalid_gamma_set)
-        invalid_para_ix(paras(:,3)==invalid_gamma_set(i))=1;
+    if isfield(filter.row, 'gamma_set')
+        invalid_gamma_set = setdiff(unique(paras(:,3)),filter.row.gamma_set);
+        for i=1:length(invalid_gamma_set)
+            invalid_para_ix(paras(:,3)==invalid_gamma_set(i))=1;
+        end
     end
-end
-if isfield(filter.row, 'delta_set')
-    invalid_delta_set = setdiff(unique(paras(:,4)),filter.row.delta_set);
-    for i=1:length(invalid_delta_set)
-        invalid_para_ix(paras(:,4)==invalid_delta_set(i))=1;
+    if isfield(filter.row, 'delta_set')
+        invalid_delta_set = setdiff(unique(paras(:,4)),filter.row.delta_set);
+        for i=1:length(invalid_delta_set)
+            invalid_para_ix(paras(:,4)==invalid_delta_set(i))=1;
+        end
     end
-end
-if isfield(filter.row, 'fb_num_set')
-    invalid_fbppr_set = setdiff(unique(paras(:,5)),filter.row.fbppr_set);
-    for i=1:length(invalid_fbppr_set)
-        invalid_para_ix(paras(:,5)==invalid_fbppr_set(i))=1;
+    if isfield(filter.row, 'fb_num_set')
+        invalid_fbppr_set = setdiff(unique(paras(:,5)),filter.row.fbppr_set);
+        for i=1:length(invalid_fbppr_set)
+            invalid_para_ix(paras(:,5)==invalid_fbppr_set(i))=1;
+        end
     end
 end
 
