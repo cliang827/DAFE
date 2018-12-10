@@ -2,6 +2,7 @@
 /data
 /temp
 /result
+/baseline
 *.mat
 *.fig
 *.txt
