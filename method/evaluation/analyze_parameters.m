@@ -19,7 +19,6 @@ gallery_set_num = eval_para.gallery_set_num;
 fb_num_set = eval_para.fb_num_set;
 data_file = eval_para.data_file;
 
-
 feedback_method = para_test_set{1,1};
 paras = cell2mat(para_test_set(:,2:6));
 paras_num = size(paras,1);

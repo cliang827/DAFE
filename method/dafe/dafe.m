@@ -18,7 +18,6 @@ probe_set_num = dataset.probe_set_num;
 gallery_set_num = dataset.gallery_set_num;
 node_set_num = dataset.node_set_num;
 
-
 robot_feedback_score = dataset.robot_feedback_score;
 g2g_dist = dataset.g2g_dist;
 g2p_dist = dataset.g2p_dist;
@@ -92,7 +91,7 @@ for i=1:probe_set_num
 
         % parameter: alpha
         temp = zeros(node_set_num,1);
-        temp(unlabeled_gallery_set) = nl/nu;
+        temp(unlabeled_gallery_set) = alpha;
         temp(labeled_gallery_set) = 1;
         model_para.alpha = temp;
 

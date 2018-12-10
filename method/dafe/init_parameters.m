@@ -24,20 +24,19 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
 
 %% set search ranges of model and experiment parameters
 ctrl_para.exp.fb_method_set = {'top-k-v'}; 
-ctrl_para.exp.alpha_set = 10.^(0); %10.^(0);
+ctrl_para.exp.alpha_set = 10.^(-1); %10.^(0);
 ctrl_para.exp.beta_percentage_set = 0.05; %[0.05 0.1 0.5 1]; 
 ctrl_para.exp.gamma_set = 0; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
+ctrl_para.exp.tot_query_times = 3;
 if debug_flag
     ctrl_para.exp.fb_num_set = [10];
     ctrl_para.exp.trial_set = [1];
-    ctrl_para.exp.tot_query_times = 3; 
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
 else
     ctrl_para.exp.fb_num_set = 1:2:10;
     ctrl_para.exp.trial_set = 1:2:10;
-    ctrl_para.exp.tot_query_times = 3; 
     ctrl_para.exp.show_progress_flag = false;
     ctrl_para.exp.show_figure_flag = false;
 end
@@ -123,7 +122,6 @@ for i=1:para_test_num
     curr_dataset.robot_feedback_score = data_file.feedback_score_set{t};
     dataset_set{i} = curr_dataset;
 end
-
 
 %% prepare parameters for result analysis
 eval_para.result_file = ctrl_para.dir_info.result_file;

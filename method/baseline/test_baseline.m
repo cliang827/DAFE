@@ -1,4 +1,5 @@
-function test_dafe(debug_flag, run_mode)
+function test_baseline(debug_flag, run_mode)
+
 
 debug_flag = 1; 
 run_mode = 'serial';
@@ -9,6 +10,7 @@ close all
 
 init_environment;
 init_parameters;
+init_baseline;
 
 
 diary([ctrl_para.dir_info.log_file(1:end-4),'.txt']); diary on;
@@ -22,7 +24,7 @@ fprintf(1, 'dataset=%s, probe_set_num=%d, trial_num=%d, tot_query_times=%d\n', .
 fprintf(1, 'include_groundtruth_flag=%d, v_sum_constraint_flag=%d\n\n', ...
     ctrl_para.exp.include_groundtruth_flag, ctrl_para.exp.v_sum_constraint);
 
-clearvars -except run_mode para_test_set dataset_set ctrl_para_set eval_para 
+clearvars -except run_mode para_test_set dataset_set ctrl_para_set baseline_para eval_para 
 
 %%
 result_file = eval_para.result_file;
@@ -43,6 +45,9 @@ switch run_mode
 
             [reid_score{i}, difficulty_score{i}, auc_score{i}, feedback_id{i}, time_result{i}] = ...
                 dafe(dataset_set{i}, ctrl_para_set{i}); 
+            
+            [reid_score_baseline{i}, auc_score_baseline{i}, feedback_id_baseline{i}, time_result_baseline{i}] = ...
+                baseline(dataset_set{i}, feedback_id{i}, baseline_para); 
         end
         save(result_file, 'para_test_set', 'eval_para', 'reid_score', 'difficulty_score', ...
             'auc_score', 'feedback_id', 'time_result', '-v7.3');
