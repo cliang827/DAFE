@@ -9,6 +9,7 @@ v_sum_constraint_flag = model_para.v_sum_constraint_flag;
 alpha = model_para.alpha;
 beta = model_para.beta;
 gamma = model_para.gamma;
+delta = model_para.delta;
 p = model_para.p;
 regu_method = model_para.regu_method;
 expected_feedback_num = model_para.expected_feedback_num;
@@ -41,6 +42,15 @@ L = W.*ff.*ff + alpha_fY;
 % beta = L_value(floor(length(L_value)*0.05));
 
 L_hat = L-beta;
+
+% temp = L_hat;
+% temp(temp>0) = 0;
+% temp(temp<0) = 255;
+% imshow(temp);
+
+
+
+
 % L_hat(eye(n)==1) = 0;
 
 % assert(0==norm(L_hat-L_hat'));
@@ -93,14 +103,19 @@ while 1
         z = -b;
         Aeq = c;
         beq = e;
-%         lb = epsilon*ones(n,1);
-%         lb(labeled_gallery_ix) = zeros(nl,1);
+        lb(unlabeled_gallery_ix) = delta;
+        lb(labeled_gallery_ix) = 0;
 %         ub = ones(n,1)-epsilon;
-        lb = zeros(n,1);
+%         lb = zeros(n,1);
         ub = ones(n,1);
+        
         options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');
         v = quadprog(H,z,[],[],Aeq,beq,lb,ub,[],options);
 %         time = time + toc;
+
+        if max(v)<1e-10
+            stop = 1;
+        end
     end
     sparseness = (sqrt(n)-norm(v,1)/norm(v,2))/(sqrt(n)-1);
     assert(~isempty(v));

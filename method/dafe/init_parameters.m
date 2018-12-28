@@ -1,6 +1,8 @@
 %% prepare dataset and directories
-curr_dataset.name = 'viper';
-curr_dataset.source = 'cvpr16_gog_xqda';
+dataset_name = 'VIPeR';
+feature_name = 'gog';
+metric_name = 'xqda';
+curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
 
 ctrl_para.dir_info.result_dir = ['.' slash 'result' slash];
 if ~exist(ctrl_para.dir_info.result_dir, 'dir'), mkdir(ctrl_para.dir_info.result_dir); end
@@ -8,11 +10,14 @@ if ~exist(ctrl_para.dir_info.result_dir, 'dir'), mkdir(ctrl_para.dir_info.result
 ctrl_para.dir_info.temp_dir = ['.' slash 'temp' slash];
 if ~exist(ctrl_para.dir_info.temp_dir, 'dir'), mkdir(ctrl_para.dir_info.temp_dir); end
 
-ctrl_para.dir_info.data_dir = ['.' slash 'data' slash curr_dataset.name slash];
+ctrl_para.dir_info.data_dir = ['.' slash 'data' slash];
 if ~exist(ctrl_para.dir_info.data_dir, 'dir'), error('no data file!'); end
 
-ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir slash curr_dataset.source '.mat'];
-data_file = load(ctrl_para.dir_info.data_file);
+ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
+data_file = load(ctrl_para.dir_info.data_file, ...
+    'testimagenames_set', 'testcamIDs_set', ...
+    'g2g_dist_set', 'g2p_dist_set', ...
+    'feedback_score_set', 'groundtruth_rank_set');
 
 version_str = cellstr(datetime('now','Format','y-MM-d-HH-mm-ss'));
 ctrl_para.dir_info.result_file = sprintf('%s%s-%s.mat', ...
@@ -23,14 +28,14 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
  
 
 %% set search ranges of model and experiment parameters
-ctrl_para.exp.fb_method_set = {'top-k-v'}; 
+ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; 
 ctrl_para.exp.alpha_set = 10.^(-1); %10.^(0);
 ctrl_para.exp.beta_percentage_set = 0.05; %[0.05 0.1 0.5 1]; 
 ctrl_para.exp.gamma_set = 0; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 ctrl_para.exp.tot_query_times = 3;
 if debug_flag
-    ctrl_para.exp.fb_num_set = [10];
+    ctrl_para.exp.fb_num_set = [2];
     ctrl_para.exp.trial_set = [1];
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
@@ -42,7 +47,7 @@ else
 end
 ctrl_para.exp.show_table_flag = true;
 
-ctrl_para.exp.v_sum_constraint = false;
+ctrl_para.exp.v_sum_constraint = true;
 ctrl_para.exp.include_groundtruth_flag = false;
 ctrl_para.exp.rank_threshold = 20;
 ctrl_para.exp.machine_type = machine_type;
@@ -104,22 +109,19 @@ for i=1:para_test_num
     ctrl_para_set{i} = ctrl_para;
     
     t = ctrl_para.exp.trial;
-    probe_ix_set = data_file.testinds_set{t}(data_file.testcamIDs_set{t}==1);
-    gallery_ix_set = data_file.testinds_set{t}(data_file.testcamIDs_set{t}==2);
-    curr_dataset.probe_feat = data_file.feature_all(probe_ix_set,:)';
-    curr_dataset.gallery_feat = data_file.feature_all(gallery_ix_set,:)';
-    dist_id_converter = data_file.dist_id_converter;
-    new_gallery_ix_set = dist_id_converter(gallery_ix_set);
-    new_probe_ix_set = dist_id_converter(probe_ix_set);
-    curr_dataset.g2g_dist = data_file.g2g_dist(new_gallery_ix_set, new_gallery_ix_set);
-    curr_dataset.g2p_dist = data_file.g2p_dist(new_gallery_ix_set, new_probe_ix_set);
+    curr_dataset.g2g_dist = data_file.g2g_dist_set{t};
+    curr_dataset.g2p_dist = data_file.g2p_dist_set{t};
     [curr_dataset.gallery_set_num, curr_dataset.probe_set_num] = size(curr_dataset.g2p_dist);
-    if debug_flag
-        curr_dataset.probe_set_num = 10; 
-    end        
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
-    curr_dataset.gallery_name_tab = data_file.allimagenames(gallery_ix_set);
+    curr_dataset.gallery_name_tab = data_file.testimagenames_set{t}(data_file.testcamIDs_set{t}==2);
     curr_dataset.robot_feedback_score = data_file.feedback_score_set{t};
+    curr_dataset.groundtruth_rank = data_file.groundtruth_rank_set{t};
+    
+    if debug_flag
+        curr_dataset.probe_set_num = 316;
+        curr_dataset.groundtruth_rank = curr_dataset.groundtruth_rank(:,1:curr_dataset.probe_set_num);
+    end
+    
     dataset_set{i} = curr_dataset;
 end
 
@@ -135,3 +137,4 @@ eval_para.gallery_set_num = curr_dataset.gallery_set_num;
 eval_para.machine_type = machine_type;
 eval_para.fb_num_set = ctrl_para.exp.fb_num_set;
 eval_para.data_file = ctrl_para.dir_info.data_file;
+eval_para.groundtruth_rank = curr_dataset.groundtruth_rank;

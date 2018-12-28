@@ -37,6 +37,7 @@ difficulty_score = zeros(gallery_set_num, probe_set_num, tot_query_times);
 suggest_feedback_id_tab = cell(probe_set_num, tot_query_times);
 suggest_feedback_name_tab = cell(probe_set_num, tot_query_times);
 query_time_tab = zeros(probe_set_num, tot_query_times);
+iter_time_tab = zeros(probe_set_num, tot_query_times);
 
 for i=1:probe_set_num
     if show_progress_flag && (mod(i,10)==0 || i==1)
@@ -84,6 +85,7 @@ for i=1:probe_set_num
         v0 = zeros(node_set_num,1);
         v0(unlabeled_gallery_set) = delta; 
         v0(labeled_gallery_set) = zeros(nl,1);
+        model_para.delta = delta;
 
         % parameter: y0
         y0 = zeros(node_set_num,1);
@@ -107,7 +109,7 @@ for i=1:probe_set_num
         total_loss(:,labeled_gallery_set) = [];
         sorted_total_loss = sort(total_loss(:), 'descend');
         sorted_total_loss = sorted_total_loss(1:2:end);
-        model_para.beta = sorted_total_loss(floor(beta_percentage*length(sorted_total_loss)));
+        model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
 
         % parameter: gamma
         model_para.gamma = gamma;
@@ -121,7 +123,7 @@ for i=1:probe_set_num
         model_para.unlabeled_gallery_set = unlabeled_gallery_set;
         model_para.node_set_num = dataset.node_set_num;
         
-        [f, v, f_mr, f_history] = solve_fv(f0, v0, y0, W, model_para);
+        [f, v, f_mr, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
         y = f0; y(labeled_gallery_set) = feedback_scores; y(end) = [];
 
         %% result collection
@@ -149,6 +151,7 @@ for i=1:probe_set_num
                 suggest_feedback_id_tab(i,:), suggest_feedback_name_tab(i,:), ctrl_para);
         end
         
+        iter_time_tab(i,query_times) = iter_times;
         query_time_tab(i, query_times) = toc(start_time);
     end
  
@@ -158,6 +161,9 @@ for i=1:probe_set_num
 end    
 time_result.time_by_round = mean(query_time_tab,1);
 time_result.time_in_total = sum(query_time_tab(:));
+
+% a = reid_score_f - reid_score_f_h2;
+% assert(abs(max(a(:)))==0);
 
 %%
 reid_score.y = reid_score_y;
@@ -170,7 +176,7 @@ auc_score_f = zeros(1, tot_query_times);
 auc_score_f_h1 = zeros(1, tot_query_times);
 auc_score_f_h2 = zeros(1, tot_query_times);
 auc_score_f_h3 = zeros(1, tot_query_times);
-groundtruth_rank = repmat(1:probe_set_num, gallery_set_num, 1);
+groundtruth_rank = dataset.groundtruth_rank;
 
 for query_times = 1:tot_query_times
 

@@ -6,6 +6,11 @@ function [cmc_result, auc_result, rank_result, hist_result] = result_evaluation(
 % close all
 % load('.\temp\result_evaluation.mat');
 
+temp = sum(abs(reid_score));
+if ~isempty(find(temp==0,1))
+    reid_score(:,temp==0) = [];
+    groundtruth(:,temp==0) = [];
+end
 
 [~, ordered] = sort(reid_score, 'descend'); 
 match = (ordered == groundtruth);

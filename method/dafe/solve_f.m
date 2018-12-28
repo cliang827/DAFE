@@ -17,6 +17,11 @@ Q_hat = diag(alpha.*sum(v_tilde,2));
 
 P = diag(sum(W,2));
 W_tilde = v_tilde.*W;
+
+% figure
+% subplot(1,2,1); imshow(W);
+% subplot(1,2,2); imshow(W_tilde);
+
 W_hat = sqrt(P)\W_tilde/sqrt(P);
 P_tilde = diag(sum(W_tilde,2));
 P_hat = sqrt(P)\P_tilde/sqrt(P);

@@ -14,6 +14,7 @@ name_tab = cell(fb_num,1);
 f = (1+f)/2; % normalize f to [0,1] so that it has the same range as v
 labeled_gallery_ix(labeled_gallery_ix==(gallery_set_num+1)) = [];
 nl = length(labeled_gallery_ix);
+
 if nl>0
     f(labeled_gallery_ix) = 0;
 end
@@ -22,7 +23,7 @@ end
 
 feedback_score = zeros(size(f));
 switch fb_method
-    case 'top-k-v'
+    case 'top-k-then-v'
         feedback_score(ix(1:rank_threshold)) = v(ix(1:rank_threshold));
 
     case 'v-only'
@@ -47,12 +48,15 @@ switch fb_method
 end
 
 [a, ix] = sort(feedback_score, 'descend');
-epsilon = 1e-3;
+epsilon = 1e-6;
 %% this trick is to kept ix result output by different machines are the same
-if a(1)<=1 && length(find(a>1-epsilon))>fb_num
-    rng(1); 
-    little_disturbance = rand(316,1)*epsilon;
-    [~, ix] = sort(feedback_score+little_disturbance, 'descend');
+if a(1)-a(fb_num)<epsilon
+    rng('default'); 
+    trunc_num = sum(a>(a(1)-epsilon));
+    sorted_ix = setdiff(sort(ix(1:trunc_num)),labeled_gallery_ix);
+    feedback_score(sorted_ix) = feedback_score(sorted_ix) + ...
+        rand(length(sorted_ix),1)*epsilon;
+    [~, ix] = sort(feedback_score, 'descend');
 end
 %% trick end
 

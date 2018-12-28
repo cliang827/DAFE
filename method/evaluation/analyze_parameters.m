@@ -1,13 +1,14 @@
 function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
 save('./temp/analyze_parameters.mat', 'result_mat_file');
-
+ 
 % close all
 % clear
 % clc
-% load('./temp/analyze_parameters.mat');
-% result_mat_file = './result/mmap-pc-2018-12-4-12-24-36.mat';
+% result_mat_file = './result/x270-2018-12-20-16-09-05.mat';
+
 load(result_mat_file);
 
+show_baseline_flag = exist('auc_score_baseline', 'var');
 show_figure_flag = eval_para.show_figure_flag;
 show_table_flag = eval_para.show_table_flag;
 trial_num = eval_para.trial_num;
@@ -25,10 +26,15 @@ paras_num = size(paras,1);
 if trial_num>1
     paras = unique(paras,'rows');
     paras_num = paras_num/trial_num;
+    
     auc_score = reshape(auc_score, trial_num, paras_num)';
     difficulty_score = reshape(difficulty_score, trial_num, paras_num)';
     feedback_id = reshape(feedback_id, trial_num, paras_num)';
     time_result = reshape(time_result, trial_num, paras_num)';
+    
+    if show_baseline_flag
+        auc_score_baseline = reshape(auc_score_baseline, trial_num, paras_num)';
+    end
 end
 
 auc_f_mr1_temp = zeros(paras_num,tot_query_times,trial_num);
@@ -38,6 +44,8 @@ auc_f_h2_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_h3_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_y_temp = zeros(paras_num,tot_query_times,trial_num);
+auc_mr_temp = zeros(paras_num,tot_query_times,trial_num);
+auc_emr_temp = zeros(paras_num,tot_query_times,trial_num);
 v_max_temp = zeros(paras_num,tot_query_times,trial_num);
 v_mean_temp = zeros(paras_num,tot_query_times,trial_num);
 v_std_temp = zeros(paras_num,tot_query_times,trial_num);
@@ -50,6 +58,8 @@ auc_f_h2 = zeros(paras_num,tot_query_times);
 auc_f_h3 = zeros(paras_num,tot_query_times);
 auc_f = zeros(paras_num,tot_query_times);
 auc_y = zeros(paras_num,tot_query_times);
+auc_mr = zeros(paras_num,tot_query_times);
+auc_emr = zeros(paras_num,tot_query_times);
 v_max = zeros(paras_num,tot_query_times);
 v_mean = zeros(paras_num,tot_query_times);
 v_std = zeros(paras_num,tot_query_times);
@@ -67,6 +77,11 @@ for i=1:paras_num
         auc_f_h1_temp(i,:,t) = auc_score{i,t}.f_h1;
         auc_f_h2_temp(i,:,t) = auc_score{i,t}.f_h2;
         auc_f_h3_temp(i,:,t) = auc_score{i,t}.f_h3;
+        
+        if show_baseline_flag
+            auc_mr_temp(i,:,t) = auc_score_baseline{i,t}.mr;
+            auc_emr_temp(i,:,t) = auc_score_baseline{i,t}.emr;
+        end
 
         v = squeeze(mean(difficulty_score{i,t},2)); %mean for all probes
         v_max_temp(i,:,t) = max(v);
@@ -81,6 +96,10 @@ for i=1:paras_num
     auc_f_h1(i,:) = mean(auc_f_h1_temp(i,:,:),3);
     auc_f_h2(i,:) = mean(auc_f_h2_temp(i,:,:),3);
     auc_f_h3(i,:) = mean(auc_f_h3_temp(i,:,:),3);
+    if show_baseline_flag
+        auc_mr(i,:) = mean(auc_mr_temp(i,:,:),3);
+        auc_emr(i,:) = mean(auc_emr_temp(i,:,:),3);
+    end
     v_max(i,:) = mean(v_max_temp(i,:,:),3);
     v_mean(i,:) = mean(v_mean_temp(i,:,:),3);
     v_std(i,:) = mean(v_std_temp(i,:,:),3);
@@ -89,14 +108,16 @@ for i=1:paras_num
 end
 time_each_probe = time_total/(paras_num*tot_query_times*probe_set_num*trial_num);
 clearvars auc_score difficulty_score time_result
-clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_temp
+clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_temp auc_mr_temp auc_emr_temp
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'fb_num'; %'feedback_method'; %'alpha-beta-gamma', 'fb_num';
-filter.row.alpha_set = 1;
-[paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, v_max, v_mean, v_std] = ...
-    para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, v_max, v_mean, v_std, filter);
+filter.column.name_set = 'fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+[paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
+    para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
+
+try assert(~isnan(paras(1,1)) && ~isempty(paras(1,1)));
+catch, error('wrong filter!'); end
 
 alpha = log10(paras(:,1));
 alpha(alpha==-Inf) = -10;
@@ -110,7 +131,8 @@ fbppr = paras(:,5);
 %%
 result = cat(2, paras, auc_f(:,1), auc_f(:,tot_query_times));
 [~, ix_star] = max(result(:,end));
-fprintf(1, '\n\nbest parameter set: log(alpha)=%.1f, beta-percentage=%.2f%%, log(gamma)=%.2f, delta=%.2f, fbppr=%.2f\n', ...
+fprintf(1, '\n\n===================================================\n\n');
+fprintf(1, 'best parameter set: log(alpha)=%.1f, beta-percentage=%.2f%%, log(gamma)=%.2f, delta=%.2f, fbppr=%.2f\n', ...
     alpha(ix_star), 100*beta(ix_star), gamma(ix_star), delta(ix_star), fbppr(ix_star));
 fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
     100*auc_f(ix_star,1), tot_query_times, 100*auc_f(ix_star,tot_query_times), ...
@@ -209,8 +231,9 @@ switch filter.column.name_set
         
     case 'feedback_method'
         %% method comparison - table version
-        auc_result = cat(1, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3);
-        qt = [1:tot_query_times]';
+        assert(size(auc_y,1)==1);
+        auc_result = cat(1, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr);
+        qt = (1:tot_query_times)';
         y = 100*auc_result(1,:)';
         f_mr1 = 100*auc_result(2,:)';
         f_mr2 = 100*auc_result(3,:)';
@@ -218,20 +241,33 @@ switch filter.column.name_set
         f_h1 = 100*auc_result(5,:)';
         f_h2 = 100*auc_result(6,:)';
         f_h3 = 100*auc_result(7,:)';
-        method_cmp_tab = table(qt,y,f_mr1,f_mr2,f,f_h1,f_h2,f_h3);
+        mr = 100*auc_result(8,:)';
+        emr = 100*auc_result(9,:)';
+        method_cmp_tab = table(qt,y,f_mr1,f_mr2,f,f_h1,f_h2,f_h3,mr,emr);
         if show_table_flag, method_cmp_tab, end
         
         %% method comparison - figure version
         hfig = figure;
-        plot(auc_y, 'ko--'); hold on;
-        plot(auc_f_mr1, 'bs-.'); hold on;
-        plot(auc_f_mr2, 'g^-.'); hold on;
-        plot(auc_f, 'r*-'); hold on; grid on;
+        if show_baseline_flag
+            plot(auc_y, 'ko--'); hold on;
+            plot(auc_f_mr1, 'rs-.'); hold on;
+            plot(auc_f_mr2, 'r^-.'); hold on;
+            plot(auc_f, 'r*-'); hold on; grid on;
+            plot(auc_mr, 'bs-.'); hold on; grid on;
+            plot(auc_emr, 'g^-.'); hold on; grid on;
+            legend({'y', 'f-mr1', 'f-mr2', 'f', 'mr', 'emr'}, 'location', 'southeast');
+        else
+            plot(auc_y, 'ko--'); hold on;
+            plot(auc_f_mr1, 'bs-.'); hold on;
+            plot(auc_f_mr2, 'g^-.'); hold on;
+            plot(auc_f, 'r*-'); hold on; grid on;
+            legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'southeast');
+        end
         set(gca, 'xtick', 1:tot_query_times);
         set(gca,'xticklabel',{'qt=1', 'qt=2', 'qt=3'});
         xlabel('query times');
         ylabel('auc');
-        legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'southeast');
+        
         saveas(hfig, [result_mat_file(1:end-4), '-method_cmp.fig']);
         if ~show_figure_flag, close(hfig); end
         
@@ -240,7 +276,7 @@ switch filter.column.name_set
             % LC: for condition of only one set of parameters!
             rank_detail = cell(probe_set_num, 2*tot_query_times+1);
             tab_column_name = cell(1, 2*tot_query_times+1);
-            groundtruth_rank = repmat(1:probe_set_num, gallery_set_num, 1);
+            groundtruth_rank = eval_para.groundtruth_rank;
             for qt=1:tot_query_times
                 if qt==1
                     [~, ~, temp] = result_evaluation(reid_score{1,1}.y(:,:,qt), groundtruth_rank); 
@@ -363,12 +399,10 @@ switch filter.column.name_set
                 histogram(rank,edges,'FaceColor', 'green');
                 xlabel('initial rank'); ylabel('#probes'); title(sprintf('better (qt=%d)',qt));
 
-
                 subplot(3,tot_query_times,qt+tot_query_times);
                 rank = init_rank(status_tab(:,qt,1)>0);
                 histogram(rank,edges,'FaceColor', 'red');
                 xlabel('initial rank'); ylabel('#probes'); title(sprintf('worse (qt=%d)',qt));
-
 
                 subplot(3,tot_query_times,qt+2*tot_query_times);
                 rank = init_rank(status_tab(:,qt,1)==0);

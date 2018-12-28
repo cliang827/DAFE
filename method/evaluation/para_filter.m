@@ -1,8 +1,10 @@
 function [paras_filtered, auc_y_filtered, auc_f_mr1_filtered, auc_f_mr2_filtered, ...
-    auc_f_filtered, auc_f_h1_filtered, auc_f_h2_filtered, auc_f_h3_filtered,...
+    auc_f_filtered, auc_f_h1_filtered, auc_f_h2_filtered, auc_f_h3_filtered, ...
+    auc_mr_filtered, auc_emr_filtered, ...
     v_max_filtered, v_mean_filtered, v_std_filtered] = ...
     para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, ...
-    auc_f, auc_f_h1, auc_f_h2, auc_f_h3, v_max, v_mean, v_std, filter)
+    auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, ...
+    v_max, v_mean, v_std, filter)
 
 % save('./temp/para_filter.mat', 'paras', 'auc_y', 'auc_f_mr1', 'auc_f_mr2', 'auc_f', 'auc_f_h1', 'auc_f_h2', 'auc_f_h3', 'v_max', 'v_mean', 'v_std', 'filter');
 
@@ -65,6 +67,8 @@ auc_f(invalid_para_ix==1,:) = [];
 auc_f_h1(invalid_para_ix==1,:) = [];
 auc_f_h2(invalid_para_ix==1,:) = [];
 auc_f_h3(invalid_para_ix==1,:) = [];
+auc_mr(invalid_para_ix==1,:) = [];
+auc_emr(invalid_para_ix==1,:) = [];
 v_max(invalid_para_ix==1,:) = [];
 v_mean(invalid_para_ix==1,:) = [];
 v_std(invalid_para_ix==1,:) = [];
@@ -99,6 +103,8 @@ if ~isempty(filter_column_ix)
     auc_f_h1_filtered = zeros(n, size(auc_f_h1,2));
     auc_f_h2_filtered = zeros(n, size(auc_f_h2,2));
     auc_f_h3_filtered = zeros(n, size(auc_f_h3,2));
+    auc_mr_filtered = zeros(n, size(auc_mr,2));
+    auc_emr_filtered = zeros(n, size(auc_emr,2));
     v_max_filtered = zeros(n, size(v_max,2));
     v_mean_filtered = zeros(n, size(v_mean,2));
     v_std_filtered = zeros(n, size(v_std,2));
@@ -116,6 +122,8 @@ if ~isempty(filter_column_ix)
         auc_f_h1_filtered(i,:) = mean(auc_f_h1(filter_ix_set, :),1);
         auc_f_h2_filtered(i,:) = mean(auc_f_h2(filter_ix_set, :),1);
         auc_f_h3_filtered(i,:) = mean(auc_f_h3(filter_ix_set, :),1);
+        auc_mr_filtered(i,:) = mean(auc_mr(filter_ix_set, :),1);
+        auc_emr_filtered(i,:) = mean(auc_emr(filter_ix_set, :),1);
         v_max_filtered(i,:) = mean(v_max(filter_ix_set, :),1);
         v_mean_filtered(i,:) = mean(v_mean(filter_ix_set,:),1);
         v_std_filtered(i,:) = mean(v_std(filter_ix_set,:),1);    
@@ -129,6 +137,8 @@ else
     auc_f_h1_filtered = mean(auc_f_mr1,1);
     auc_f_h2_filtered = mean(auc_f_h2,1);
     auc_f_h3_filtered = mean(auc_f_h3,1);
+    auc_mr_filtered = mean(auc_mr,1);
+    auc_emr_filtered = mean(auc_emr,1);
     v_max_filtered = mean(v_max,1);
     v_mean_filtered = mean(v_mean,1);
     v_std_filtered = mean(v_std,1);    
