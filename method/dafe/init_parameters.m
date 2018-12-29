@@ -13,20 +13,38 @@ if ~exist(ctrl_para.dir_info.temp_dir, 'dir'), mkdir(ctrl_para.dir_info.temp_dir
 ctrl_para.dir_info.data_dir = ['.' slash 'data' slash];
 if ~exist(ctrl_para.dir_info.data_dir, 'dir'), error('no data file!'); end
 
-% ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
+% ctrl_para.dir_info.data_file = './data/viper/viper_gog_xqda.mat';
 % data_file = load(ctrl_para.dir_info.data_file, ...
 %     'testimagenames_set', 'testcamIDs_set', ...
 %     'g2g_dist_set', 'g2p_dist_set', ...
-%     'feedback_score_set', 'groundtruth_rank_set');
+%     'feedback_dist_set', 'groundtruth_rank_set');
+
 
 ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
 data_file = load(ctrl_para.dir_info.data_file, ...
     'testimagenames_set', 'testcamIDs_set', ...
     'g2g_dist_set', 'g2p_dist_set', ...
-    'groundtruth_rank_set');
-ctrl_para.dir_info.data_file = './data/viper/cvpr16_gog_xqda.mat';
-temp = load(ctrl_para.dir_info.data_file,'feedback_score_set');
-data_file.feedback_score_set = temp.feedback_score_set;
+    'feedback_dist_set', 'groundtruth_rank_set');
+
+
+% ctrl_para.dir_info.data_file = './data/viper/viper_gog_xqda.mat';
+% data_file = load(ctrl_para.dir_info.data_file, ...
+%     'testimagenames_set', 'testcamIDs_set', ...
+%     'feedback_dist_set', 'groundtruth_rank_set');
+% ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
+% temp = load(ctrl_para.dir_info.data_file,'g2g_dist_set', 'g2p_dist_set');
+% data_file.g2g_dist_set = temp.g2g_dist_set;
+% data_file.g2p_dist_set = temp.g2p_dist_set;
+
+
+% ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
+% data_file = load(ctrl_para.dir_info.data_file, ...
+%     'testimagenames_set', 'testcamIDs_set', ...
+%     'g2g_dist_set', 'g2p_dist_set', ...
+%     'feedback_dist_set', 'groundtruth_rank_set');
+% ctrl_para.dir_info.data_file = './data/viper/viper_gog_xqda.mat';
+% temp = load(ctrl_para.dir_info.data_file,'feedback_dist_set');
+% data_file.feedback_dist_set = temp.feedback_dist_set;
 
 
 version_str = cellstr(datetime('now','Format','y-MM-d-HH-mm-ss'));
@@ -124,7 +142,7 @@ for i=1:para_test_num
     [curr_dataset.gallery_set_num, curr_dataset.probe_set_num] = size(curr_dataset.g2p_dist);
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     curr_dataset.gallery_name_tab = data_file.testimagenames_set{t}(data_file.testcamIDs_set{t}==2);
-    curr_dataset.robot_feedback_score = data_file.feedback_score_set{t};
+    curr_dataset.feedback_dist = data_file.feedback_dist_set{t};
     curr_dataset.groundtruth_rank = data_file.groundtruth_rank_set{t};
     
     if debug_flag

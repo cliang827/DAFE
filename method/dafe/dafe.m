@@ -18,7 +18,7 @@ probe_set_num = dataset.probe_set_num;
 gallery_set_num = dataset.gallery_set_num;
 node_set_num = dataset.node_set_num;
 
-robot_feedback_score = dataset.robot_feedback_score;
+robot_feedback_score = dist2sim(dataset.feedback_dist);
 g2g_dist = dataset.g2g_dist;
 g2p_dist = dataset.g2p_dist;
 gallery_name_tab = dataset.gallery_name_tab;
