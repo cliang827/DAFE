@@ -25,7 +25,7 @@ switch method
         k=size(F,2);
         for i=1:k
             f=F(:,i);
-            f = ((f-min(f))./(max(f)-min(f)))*2-1;
+            f = ((f-min(f))./(max(f)-min(f)));
             F(:,i)=f;
         end
 end

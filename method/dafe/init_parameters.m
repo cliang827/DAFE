@@ -23,7 +23,8 @@ if ~exist(ctrl_para.dir_info.data_dir, 'dir'), error('no data file!'); end
 ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
 data_file = load(ctrl_para.dir_info.data_file, ...
     'testimagenames_set', 'testcamIDs_set', ...
-    'g2g_dist_set', 'g2p_dist_set', ...
+    'g2g_sim_set', 'g2p_sim_set', ...
+    'probe_feat_set', 'gallery_feat_set', ...
     'feedback_dist_set', 'groundtruth_rank_set');
 
 
@@ -56,12 +57,12 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
  
 
 %% set search ranges of model and experiment parameters
-ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; 
+ctrl_para.exp.fb_method_set = {'f-only'}; 
 ctrl_para.exp.alpha_set = 10.^(-1); %10.^(0);
 ctrl_para.exp.beta_percentage_set = 0.05; %[0.05 0.1 0.5 1]; 
 ctrl_para.exp.gamma_set = 0; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
-ctrl_para.exp.tot_query_times = 3;
+ctrl_para.exp.tot_query_times = 2;
 if debug_flag
     ctrl_para.exp.fb_num_set = [2];
     ctrl_para.exp.trial_set = [1];
@@ -137,13 +138,16 @@ for i=1:para_test_num
     ctrl_para_set{i} = ctrl_para;
     
     t = ctrl_para.exp.trial;
-    curr_dataset.g2g_dist = data_file.g2g_dist_set{t};
-    curr_dataset.g2p_dist = data_file.g2p_dist_set{t};
-    [curr_dataset.gallery_set_num, curr_dataset.probe_set_num] = size(curr_dataset.g2p_dist);
+    curr_dataset.g2g_sim = data_file.g2g_sim_set{t};
+    curr_dataset.g2p_sim = data_file.g2p_sim_set{t};
+    [curr_dataset.gallery_set_num, curr_dataset.probe_set_num] = size(curr_dataset.g2p_sim);
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     curr_dataset.gallery_name_tab = data_file.testimagenames_set{t}(data_file.testcamIDs_set{t}==2);
     curr_dataset.feedback_dist = data_file.feedback_dist_set{t};
     curr_dataset.groundtruth_rank = data_file.groundtruth_rank_set{t};
+    curr_dataset.probe_feat = data_file.probe_feat_set{t};
+    curr_dataset.gallery_feat = data_file.gallery_feat_set{t};
+    curr_dataset.feat_dim = size(curr_dataset.gallery_feat,2);
     
     if debug_flag
         curr_dataset.probe_set_num = 316;
