@@ -13,40 +13,11 @@ if ~exist(ctrl_para.dir_info.temp_dir, 'dir'), mkdir(ctrl_para.dir_info.temp_dir
 ctrl_para.dir_info.data_dir = ['.' slash 'data' slash];
 if ~exist(ctrl_para.dir_info.data_dir, 'dir'), error('no data file!'); end
 
-% ctrl_para.dir_info.data_file = './data/viper/viper_gog_xqda.mat';
-% data_file = load(ctrl_para.dir_info.data_file, ...
-%     'testimagenames_set', 'testcamIDs_set', ...
-%     'g2g_dist_set', 'g2p_dist_set', ...
-%     'feedback_dist_set', 'groundtruth_rank_set');
-
-
 ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
 data_file = load(ctrl_para.dir_info.data_file, ...
     'testimagenames_set', 'testcamIDs_set', ...
-    'g2g_sim_set', 'g2p_sim_set', ...
     'probe_feat_set', 'gallery_feat_set', ...
-    'feedback_dist_set', 'groundtruth_rank_set');
-
-
-% ctrl_para.dir_info.data_file = './data/viper/viper_gog_xqda.mat';
-% data_file = load(ctrl_para.dir_info.data_file, ...
-%     'testimagenames_set', 'testcamIDs_set', ...
-%     'feedback_dist_set', 'groundtruth_rank_set');
-% ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
-% temp = load(ctrl_para.dir_info.data_file,'g2g_dist_set', 'g2p_dist_set');
-% data_file.g2g_dist_set = temp.g2g_dist_set;
-% data_file.g2p_dist_set = temp.g2p_dist_set;
-
-
-% ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
-% data_file = load(ctrl_para.dir_info.data_file, ...
-%     'testimagenames_set', 'testcamIDs_set', ...
-%     'g2g_dist_set', 'g2p_dist_set', ...
-%     'feedback_dist_set', 'groundtruth_rank_set');
-% ctrl_para.dir_info.data_file = './data/viper/viper_gog_xqda.mat';
-% temp = load(ctrl_para.dir_info.data_file,'feedback_dist_set');
-% data_file.feedback_dist_set = temp.feedback_dist_set;
-
+    'robot_dist_set', 'groundtruth_rank_set');
 
 version_str = cellstr(datetime('now','Format','y-MM-d-HH-mm-ss'));
 ctrl_para.dir_info.result_file = sprintf('%s%s-%s.mat', ...
@@ -58,7 +29,7 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
 
 %% set search ranges of model and experiment parameters
 ctrl_para.exp.fb_method_set = {'f-only'}; 
-ctrl_para.exp.alpha_set = 10.^(-1); %10.^(0);
+ctrl_para.exp.alpha_set = 10.^(-1); %10.^(-1);
 ctrl_para.exp.beta_percentage_set = 0.05; %[0.05 0.1 0.5 1]; 
 ctrl_para.exp.gamma_set = 0; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
@@ -138,16 +109,15 @@ for i=1:para_test_num
     ctrl_para_set{i} = ctrl_para;
     
     t = ctrl_para.exp.trial;
-    curr_dataset.g2g_sim = data_file.g2g_sim_set{t};
-    curr_dataset.g2p_sim = data_file.g2p_sim_set{t};
-    [curr_dataset.gallery_set_num, curr_dataset.probe_set_num] = size(curr_dataset.g2p_sim);
-    curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
+
     curr_dataset.gallery_name_tab = data_file.testimagenames_set{t}(data_file.testcamIDs_set{t}==2);
-    curr_dataset.feedback_dist = data_file.feedback_dist_set{t};
+    curr_dataset.robot_dist = data_file.robot_dist_set{t};
     curr_dataset.groundtruth_rank = data_file.groundtruth_rank_set{t};
     curr_dataset.probe_feat = data_file.probe_feat_set{t};
+    curr_dataset.probe_set_num = size(curr_dataset.probe_feat, 1);
     curr_dataset.gallery_feat = data_file.gallery_feat_set{t};
-    curr_dataset.feat_dim = size(curr_dataset.gallery_feat,2);
+    [curr_dataset.gallery_set_num, curr_dataset.feat_dim] = size(curr_dataset.gallery_feat);
+    curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     
     if debug_flag
         curr_dataset.probe_set_num = 316;

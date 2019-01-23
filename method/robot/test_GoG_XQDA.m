@@ -100,8 +100,6 @@ for database_id = 1%[1 2 6 7 4 5]
     
     g2p_dist_set = cell(sys.setnum,1);
     g2g_dist_set = cell(sys.setnum,1);
-    g2p_sim_set = cell(sys.setnum,1);
-    g2g_sim_set = cell(sys.setnum,1);
     probe_feat_set = cell(sys.setnum,1);
     gallery_feat_set = cell(sys.setnum,1);
     groundtruth_rank_set = cell(sys.setnum,1);
@@ -148,8 +146,6 @@ for database_id = 1%[1 2 6 7 4 5]
 
             diff_feat = repmat(gallery_feat(i,:), gallery_set_num, 1)-gallery_feat;
             g2g_dist(i,:) = sqrt(diag(diff_feat*diff_feat'))';
-            
-            
 
             if mod(i, show_step) == show_step-1
                 fprintf(1, repmat('\b', 1, nchar));
@@ -163,16 +159,14 @@ for database_id = 1%[1 2 6 7 4 5]
 
         g2p_dist_set{set} = g2p_dist;
         g2g_dist_set{set} = g2g_dist;  
-        
-        g2p_sim_set{set} = gallery_feat*probe_feat';
-        g2g_sim_set{set} = gallery_feat*gallery_feat';
+
     end
     time = toc(t2);
     fprintf(1, 'total time: %.0f sec.\n', time);
 
     %% construct robot
     t3 = tic;
-    feedback_dist_set = cell(sys.setnum,1);
+    robot_dist_set = cell(sys.setnum,1);
     for set = 1:(sys.setnum)
         fprintf('----------------------------------------------------------------------------------------------------\n');
         fprintf('set = %d \n', set);
@@ -226,12 +220,7 @@ for database_id = 1%[1 2 6 7 4 5]
         fprintf('%5.2f%%, %5.2f%%, %5.2f%%, %5.2f%%, %5.2f%%\n\n', CMC([1,5,10,15,20]));
         clear camIDs probX galX probX galLabels probLabels options XQDAresult
 
-%         dists = dists';
-%         sigma = repmat(mean(dists), size(dists,1), 1);
-%         feedback_score = exp(-1*dists./sigma);
-%         feedback_score = normalization(feedback_score, [-1 1], 0, 'range-priority');
-%         feedback_score_set{set,1} = feedback_score;
-        feedback_dist_set{set,1} = dists';
+        robot_dist_set{set,1} = dists';
     end
     time = toc(t3);
     fprintf(1, 'total time: %.0f sec.\n', time);
@@ -240,9 +229,7 @@ for database_id = 1%[1 2 6 7 4 5]
     save(save_dir, ...
         'testimagenames_set', 'testcamIDs_set', ...
         'probe_feat_set', 'gallery_feat_set', ...
-        'g2p_dist_set', 'g2g_dist_set', ...
-        'g2p_sim_set', 'g2g_sim_set', ...
-        'feedback_dist_set', 'groundtruth_rank_set', '-v7.3');
+        'robot_dist_set', 'groundtruth_rank_set', '-v7.3');
 end
 
 

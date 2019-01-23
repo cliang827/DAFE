@@ -21,7 +21,7 @@ probe_feat = dataset.probe_feat;
 gallery_feat = dataset.gallery_feat;
 feat_dim = dataset.feat_dim;
 
-robot_feedback_score = dist2sim(dataset.feedback_dist);
+robot_feedback_score = dist2sim(dataset.robot_dist);
 % g2g_sim = dataset.g2g_sim;
 % g2p_sim = dataset.g2p_sim;
 gallery_name_tab = dataset.gallery_name_tab;
@@ -86,7 +86,7 @@ for i=1:probe_set_num
             % parameter: f0
             f0 = W(:,end); 
             f0(end) = 1;
-            f0(1:end) = normalization(f0(1:end), [-1 1], 0, 'range-priority');
+            f0(1:end) = range_normalization(f0(1:end));
             
             % parameter: v0
             v0 = zeros(node_set_num,1);
@@ -96,7 +96,7 @@ for i=1:probe_set_num
 
             % parameter: y0
             y0 = zeros(node_set_num,1);
-            y0(end) = 1;
+            y0(labeled_gallery_set) = feedback_scores;
 
             % parameter: alpha
             temp = zeros(node_set_num,1);
@@ -129,14 +129,48 @@ for i=1:probe_set_num
             model_para.labeled_gallery_set = labeled_gallery_set;
             model_para.unlabeled_gallery_set = unlabeled_gallery_set;
             model_para.node_set_num = dataset.node_set_num;
-            
-            
         else
             f0 = f;
+            
+            % parameter: y0
+%             y0 = zeros(node_set_num,1);
+%             y0(labeled_gallery_set) = feedback_scores;
+            
+%             % parameter: alpha
+%             temp = zeros(node_set_num,1);
+%             temp(unlabeled_gallery_set) = alpha;
+%             temp(labeled_gallery_set) = 1;
+%             model_para.alpha = temp;
+% 
+%             % parameter: beta
+%             P = diag(sum(W,2));
+%             f_normalized = sqrt(P)\f0; % eq.(31) in TR17
+%             ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
+%             smooth_loss = W.*ff.*ff;
+%             fitting_loss = repmat(model_para.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
+%                 repmat(model_para.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
+%             total_loss = smooth_loss + fitting_loss;
+%             total_loss(labeled_gallery_set,:) = []; 
+%             total_loss(:,labeled_gallery_set) = []; 
+%             sorted_total_loss = sort(total_loss(:), 'descend');
+%             sorted_total_loss = sorted_total_loss(1:2:end);
+%             model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
+% 
+%             % parameter: gamma
+%             model_para.gamma = gamma;
+% 
+%             % others parameters
+%             model_para.p = ctrl_para.model.p;
+%             model_para.regu_method = ctrl_para.model.regu_method;
+%             model_para.expected_feedback_num = ctrl_para.model.fb_num;
+%             model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
+%             model_para.labeled_gallery_set = labeled_gallery_set;
+%             model_para.unlabeled_gallery_set = unlabeled_gallery_set;
+%             model_para.node_set_num = dataset.node_set_num;
         end
         
         
-        
+
         [f, v, f_mr, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
         y = f0; y(labeled_gallery_set) = feedback_scores; y(end) = [];
 
