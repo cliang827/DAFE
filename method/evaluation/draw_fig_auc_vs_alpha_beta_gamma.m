@@ -3,7 +3,7 @@ hfig = figure;
 subplot(2,2,1); % alpha-beta-gamma
 diameter = 100*auc_f_kmean(:,tot_query_times);
 color = auc_f_kmean(:,tot_query_times);
-scatter3(alpha,beta,gamma,diameter,color,'linewidth',3);
+scatter3(log_alpha,beta,log_gamma,diameter,color,'linewidth',3);
 xlabel('log(\alpha)');
 ylabel('\beta%');
 zlabel('log(\gamma)');
@@ -18,15 +18,15 @@ caxis([color_bottom color_top]);
 colorbar;
 title(sprintf('%s+%d',feedback_method,v_sum_constraint));
 
-alpha_set = unique(alpha);
+log_alpha_set = unique(log_alpha);
 beta_set = unique(beta);
-gamma_set = unique(gamma);
+log_gamma_set = unique(log_gamma);
 
 subplot(2,2,2); % alpha-beta
-alpha_beta_auc = zeros(length(alpha_set), length(beta_set));
-for i=1:length(alpha_set)
+alpha_beta_auc = zeros(length(log_alpha_set), length(beta_set));
+for i=1:length(log_alpha_set)
     for j=1:length(beta_set)
-        alpha_beta_auc(i,j) = mean(auc_f_kmean(alpha==alpha_set(i) & beta==beta_set(j),2));
+        alpha_beta_auc(i,j) = mean(auc_f_kmean(log_alpha==log_alpha_set(i) & beta==beta_set(j),2));
     end
 end
 h = bar3(alpha_beta_auc');
@@ -39,15 +39,15 @@ caxis([color_bottom color_top]);
 colorbar;
 
 xlabel('log(\alpha)');ylabel('\beta%');zlabel('auc');
-set(gca,'xticklabel',num2cell(alpha_set));
+set(gca,'xticklabel',num2cell(log_alpha_set));
 set(gca,'yticklabel',num2cell(beta_set));
 title('\alpha-\beta%-auc'); 
 
 subplot(2,2,3); % alpha-gamma
-alpha_gamma_auc = zeros(length(alpha_set), length(gamma_set));
-for i=1:length(alpha_set)
-    for j=1:length(gamma_set)
-        alpha_gamma_auc(i,j) = mean(auc_f_kmean(alpha==alpha_set(i) & gamma==gamma_set(j),2));
+alpha_gamma_auc = zeros(length(log_alpha_set), length(log_gamma_set));
+for i=1:length(log_alpha_set)
+    for j=1:length(log_gamma_set)
+        alpha_gamma_auc(i,j) = mean(auc_f_kmean(log_alpha==log_alpha_set(i) & log_gamma==log_gamma_set(j),2));
     end
 end
 h = bar3(alpha_gamma_auc');
@@ -59,15 +59,15 @@ caxis manual
 caxis([color_bottom color_top]);
 colorbar;
 xlabel('log(\alpha)');ylabel('log(\gamma)');zlabel('auc');
-set(gca,'xticklabel',num2cell(alpha_set));
-set(gca,'yticklabel',num2cell(gamma_set));
+set(gca,'xticklabel',num2cell(log_alpha_set));
+set(gca,'yticklabel',num2cell(log_gamma_set));
 title('\alpha-\gamma-auc');
 
 subplot(2,2,4); % beta-gamma
-beta_gamma_auc = zeros(length(beta_set), length(gamma_set));
+beta_gamma_auc = zeros(length(beta_set), length(log_gamma_set));
 for i=1:length(beta_set)
-    for j=1:length(gamma_set)
-        beta_gamma_auc(i,j) = mean(auc_f_kmean(beta==beta_set(i) & gamma==gamma_set(j),2));
+    for j=1:length(log_gamma_set)
+        beta_gamma_auc(i,j) = mean(auc_f_kmean(beta==beta_set(i) & log_gamma==log_gamma_set(j),2));
     end
 end
 h = bar3(beta_gamma_auc');
@@ -80,7 +80,7 @@ caxis([color_bottom color_top]);
 colorbar;
 xlabel('\beta%');ylabel('log(\gamma)');zlabel('auc');
 set(gca,'xticklabel',num2cell(beta_set));
-set(gca,'yticklabel',num2cell(gamma_set));
+set(gca,'yticklabel',num2cell(log_gamma_set));
 title('\beta%-\gamma-auc');
 
 saveas(hfig, [result_mat_file(1:end-4), '-3D.fig']);

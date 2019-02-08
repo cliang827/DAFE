@@ -58,7 +58,7 @@ Eq_18 = g_vt + partial_g_vt'*(v-vt);
 %   to fix this problem, make a big enough initilization of L_hat_plus so
 %   that L_hat_minux = L_hat_plus - L_hat is PSD enough to make g(v) is
 %   convex
-assert(Eq_18-gv<=epsilon);
+% assert(Eq_18-gv<=epsilon);
 
 % Eq.(21)
 const_eq_21 = vt'*L_hat_minus*vt/(n*n)-gamma*regu(vt,p,0,regu_method)/n - ...

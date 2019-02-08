@@ -1,9 +1,9 @@
-function [f, fval] = solve_f(v, y, W, model_para)
+function [f, fval] = solve_f(f0, v, y, W, model_para)
 % purpose: 
 %   solve f directly without splitting it into ulabeled and labeled parts, 
 %   i.e., f = [fu; fl]; (This appears in AAAI'19 draft)
 %   
-% save('./temp/solve_f.mat', 'v', 'y', 'W', 'model_para', 'ctrl_para');
+% save('./temp/solve_f.mat', 'f0, ', 'v', 'y', 'W', 'model_para', 'ctrl_para');
 
 % clear
 % clc
@@ -39,10 +39,13 @@ assert(0==p); % assure A is positive-definite. Large V (>=1) values may trigger 
 % epsilon = 1e-6;
 H = 2*A;
 z = -b;
-lb = -1*ones(n,1);
+Aeq = zeros(1,n);
+Aeq(n) = 1;
+beq = 1;
+lb = zeros(n,1);
 ub = ones(n,1);
 options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');
-[f, fval] = quadprog(H,z,[],[],[],[],lb,ub,[],options);
+[f, fval] = quadprog(H,z,[],[],Aeq,beq,lb,ub,f0,options);
 % time = toc;
 
 % assert(norm(f(nu+1:n) - fl)<epsilon);

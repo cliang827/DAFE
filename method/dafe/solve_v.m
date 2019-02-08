@@ -9,7 +9,6 @@ v_sum_constraint_flag = model_para.v_sum_constraint_flag;
 alpha = model_para.alpha;
 beta = model_para.beta;
 gamma = model_para.gamma;
-delta = model_para.delta;
 p = model_para.p;
 regu_method = model_para.regu_method;
 expected_feedback_num = model_para.expected_feedback_num;
@@ -103,10 +102,7 @@ while 1
         z = -b;
         Aeq = c;
         beq = e;
-        lb(unlabeled_gallery_ix) = delta;
-        lb(labeled_gallery_ix) = 0;
-%         ub = ones(n,1)-epsilon;
-%         lb = zeros(n,1);
+        lb = zeros(n,1);
         ub = ones(n,1);
         
         options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');

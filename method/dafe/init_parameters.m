@@ -29,7 +29,7 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
 
 %% set search ranges of model and experiment parameters
 ctrl_para.exp.fb_method_set = {'f-only'}; 
-ctrl_para.exp.alpha_set = 10.^(-1); %10.^(-1);
+ctrl_para.exp.alpha_set = 1e-1; %[1e-2 1e-1 1e0 1e1];
 ctrl_para.exp.beta_percentage_set = 0.05; %[0.05 0.1 0.5 1]; 
 ctrl_para.exp.gamma_set = 0; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
@@ -47,7 +47,7 @@ else
 end
 ctrl_para.exp.show_table_flag = true;
 
-ctrl_para.exp.v_sum_constraint = true;
+ctrl_para.exp.v_sum_constraint = false;
 ctrl_para.exp.include_groundtruth_flag = false;
 ctrl_para.exp.rank_threshold = 20;
 ctrl_para.exp.machine_type = machine_type;

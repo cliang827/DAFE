@@ -9,7 +9,6 @@ function [reid_score, difficulty_score, auc_score, suggest_feedback_id_tab, time
 alpha = ctrl_para.model.alpha;
 beta_percentage = ctrl_para.model.beta_percentage;
 gamma = ctrl_para.model.gamma;
-delta = ctrl_para.model.delta;
 
 show_progress_flag = ctrl_para.exp.show_progress_flag;
 tot_query_times = ctrl_para.exp.tot_query_times;
@@ -66,7 +65,6 @@ for i=1:probe_set_num
         feedback_scores  = cat(1, feedback_scores, new_feedback_scores);
         labeled_gallery_set = cat(1, labeled_gallery_set, new_feedback_gallery_ix);
         unlabeled_gallery_set = setdiff(1:node_set_num, labeled_gallery_set);
-        nl = length(labeled_gallery_set);     % # labeled galleries
 
         
         %% prepare parameters for DAFE
@@ -81,98 +79,55 @@ for i=1:probe_set_num
         I = eye(node_set_num);
         W(I==1) = 0;
  
+        % parameter: f0
+        f0 = W(:,end); 
+        f0(end) = 1;
+        f0(1:end) = range_normalization(f0(1:end));
         
-        if 1==query_times
-            % parameter: f0
-            f0 = W(:,end); 
-            f0(end) = 1;
-            f0(1:end) = range_normalization(f0(1:end));
+        % parameter: v0
+        v0 = zeros(node_set_num,1);
             
-            % parameter: v0
-            v0 = zeros(node_set_num,1);
-            v0(unlabeled_gallery_set) = delta; 
-            v0(labeled_gallery_set) = zeros(nl,1);
-            model_para.delta = delta;
-
+        if 1==query_times
             % parameter: y0
             y0 = zeros(node_set_num,1);
-            y0(labeled_gallery_set) = feedback_scores;
-
-            % parameter: alpha
-            temp = zeros(node_set_num,1);
-            temp(unlabeled_gallery_set) = alpha;
-            temp(labeled_gallery_set) = 1;
-            model_para.alpha = temp;
-
-            % parameter: beta
-            P = diag(sum(W,2));
-            f_normalized = sqrt(P)\f0; % eq.(31) in TR17
-            ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
-            smooth_loss = W.*ff.*ff;
-            fitting_loss = repmat(model_para.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
-                repmat(model_para.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
-            total_loss = smooth_loss + fitting_loss;
-            total_loss(labeled_gallery_set,:) = []; 
-            total_loss(:,labeled_gallery_set) = []; 
-            sorted_total_loss = sort(total_loss(:), 'descend');
-            sorted_total_loss = sorted_total_loss(1:2:end);
-            model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
-
-            % parameter: gamma
-            model_para.gamma = gamma;
-
-            % others parameters
-            model_para.p = ctrl_para.model.p;
-            model_para.regu_method = ctrl_para.model.regu_method;
-            model_para.expected_feedback_num = ctrl_para.model.fb_num;
-            model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
-            model_para.labeled_gallery_set = labeled_gallery_set;
-            model_para.unlabeled_gallery_set = unlabeled_gallery_set;
-            model_para.node_set_num = dataset.node_set_num;
+            
         else
-            f0 = f;
-            
-            % parameter: y0
-%             y0 = zeros(node_set_num,1);
-%             y0(labeled_gallery_set) = feedback_scores;
-            
-%             % parameter: alpha
-%             temp = zeros(node_set_num,1);
-%             temp(unlabeled_gallery_set) = alpha;
-%             temp(labeled_gallery_set) = 1;
-%             model_para.alpha = temp;
-% 
-%             % parameter: beta
-%             P = diag(sum(W,2));
-%             f_normalized = sqrt(P)\f0; % eq.(31) in TR17
-%             ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
-%             smooth_loss = W.*ff.*ff;
-%             fitting_loss = repmat(model_para.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
-%                 repmat(model_para.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
-%             total_loss = smooth_loss + fitting_loss;
-%             total_loss(labeled_gallery_set,:) = []; 
-%             total_loss(:,labeled_gallery_set) = []; 
-%             sorted_total_loss = sort(total_loss(:), 'descend');
-%             sorted_total_loss = sorted_total_loss(1:2:end);
-%             model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
-% 
-%             % parameter: gamma
-%             model_para.gamma = gamma;
-% 
-%             % others parameters
-%             model_para.p = ctrl_para.model.p;
-%             model_para.regu_method = ctrl_para.model.regu_method;
-%             model_para.expected_feedback_num = ctrl_para.model.fb_num;
-%             model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
-%             model_para.labeled_gallery_set = labeled_gallery_set;
-%             model_para.unlabeled_gallery_set = unlabeled_gallery_set;
-%             model_para.node_set_num = dataset.node_set_num;
+            y0 = f0;  
         end
         
+        y0(labeled_gallery_set) = feedback_scores;
         
+        % parameter: alpha
+        model_para.alpha = alpha*ones(node_set_num,1);
+
+        % parameter: beta
+        P = diag(sum(W,2));
+        f_normalized = sqrt(P)\f0; % eq.(31) in TR17
+        ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
+        smooth_loss = W.*ff.*ff;
+        fitting_loss = repmat(model_para.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
+            repmat(model_para.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
+        total_loss = smooth_loss + fitting_loss;
+        total_loss(labeled_gallery_set,:) = []; 
+        total_loss(:,labeled_gallery_set) = []; 
+        sorted_total_loss = sort(total_loss(:), 'descend');
+        sorted_total_loss = sorted_total_loss(1:2:end);
+        model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
+
+        % parameter: gamma
+        model_para.gamma = gamma;
+
+        % others parameters
+        model_para.p = ctrl_para.model.p;
+        model_para.regu_method = ctrl_para.model.regu_method;
+        model_para.expected_feedback_num = ctrl_para.model.fb_num;
+        model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
+        model_para.labeled_gallery_set = labeled_gallery_set;
+        model_para.unlabeled_gallery_set = unlabeled_gallery_set;
+        model_para.node_set_num = dataset.node_set_num;
 
         [f, v, f_mr, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
-        y = f0; y(labeled_gallery_set) = feedback_scores; y(end) = [];
+        y = f0; y(end) = [];
 
         %% result collection
         reid_score_f_mr1(:,i,query_times) = f_mr(1:gallery_set_num,1);

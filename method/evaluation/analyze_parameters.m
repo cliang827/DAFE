@@ -1,10 +1,11 @@
 function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
 save('./temp/analyze_parameters.mat', 'result_mat_file');
- 
+%  
 % close all
 % clear
 % clc
-% result_mat_file = './result/x270-2018-12-20-16-09-05.mat';
+% load('./temp/analyze_parameters.mat');
+
 
 load(result_mat_file);
 
@@ -112,18 +113,18 @@ clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_tem
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+filter.column.name_set = 'alpha-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 [paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
     para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
 try assert(~isnan(paras(1,1)) && ~isempty(paras(1,1)));
 catch, error('wrong filter!'); end
 
-alpha = log10(paras(:,1));
-alpha(alpha==-Inf) = -10;
+log_alpha = log10(paras(:,1));
+log_alpha(log_alpha==-Inf) = -10;
 beta = paras(:,2);
-gamma = log10(paras(:,3));
-gamma(gamma==-Inf) = -10;
+log_gamma = log10(paras(:,3));
+log_gamma(log_gamma==-Inf) = -10;
 delta = paras(:,4);
 fbppr = paras(:,5);
 
@@ -133,7 +134,7 @@ result = cat(2, paras, auc_f(:,1), auc_f(:,tot_query_times));
 [~, ix_star] = max(result(:,end));
 fprintf(1, '\n\n===================================================\n\n');
 fprintf(1, 'best parameter set: log(alpha)=%.1f, beta-percentage=%.2f%%, log(gamma)=%.2f, delta=%.2f, fbppr=%.2f\n', ...
-    alpha(ix_star), 100*beta(ix_star), gamma(ix_star), delta(ix_star), fbppr(ix_star));
+    log_alpha(ix_star), 100*beta(ix_star), log_gamma(ix_star), delta(ix_star), fbppr(ix_star));
 fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
     100*auc_f(ix_star,1), tot_query_times, 100*auc_f(ix_star,tot_query_times), ...
     sum(auc_f(:,tot_query_times)>auc_f(:,1)), size(paras,1));
@@ -167,23 +168,23 @@ switch filter.column.name_set
         hfig = figure;
         ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
         ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        alpha_set = unique(alpha);
-        alpha_num = length(alpha_set);
+        log_alpha_set = unique(log_alpha);
+        alpha_num = length(log_alpha_set);
         for i = 1:alpha_num
-            ix = find(alpha==alpha_set(i));
+            ix = find(log_alpha==log_alpha_set(i));
             for qt=1:tot_query_times
                 subplot(alpha_num,tot_query_times,(i-1)*tot_query_times+qt);
                 plot(fb_num_set, auc_y(ix,qt), 'ko--'); hold on;
                 plot(fb_num_set, auc_f_mr1(ix,qt), 'bs-.'); hold on;
                 plot(fb_num_set, auc_f_mr1(ix,qt), 'gs-.'); hold on;
                 plot(fb_num_set, auc_f(ix,qt), 'r*-'); hold on; grid on;
-                axis([-Inf Inf ymin ymax]);
+%                 axis([-Inf Inf ymin ymax]);
                 set(gca, 'xtick', fb_num_set);
                 set(gca,'xticklabel',num2cell(fb_num_set));
                 xlabel('fb\_num');
                 ylabel('auc');
                 legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
-                title(sprintf('qt=%d',qt));
+                title(sprintf('log10(alpha)=%.1f, qt=%d',log_alpha_set(i), qt));
             end
         end
         saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
@@ -222,8 +223,12 @@ switch filter.column.name_set
         set(gca,'xticklabel',num2cell(fb_num_set),'fontsize',font_size);
         xlabel('fb\_num','fontsize',font_size);
         ylabel('auc','fontsize',font_size);
-        legend({'init.', 'qt=1', 'qt=2', 'qt=3'}, ...
-            'location', 'northwest','fontsize',font_size);
+        legend_title = cell(1, 1+tot_query_times);
+        legend_title{1} = 'init.';
+        for i=1:tot_query_times
+            legend_title{i+1} = sprintf('qt=%d',i);
+        end
+        legend(legend_title, 'location', 'northwest','fontsize',font_size);
         title(feedback_method);
         saveas(hfig, [result_mat_file(1:end-4), '-fb_num_one_figure.fig']);
         if ~show_figure_flag, close(hfig); end
