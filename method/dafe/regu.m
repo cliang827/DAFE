@@ -84,6 +84,8 @@ switch method
                 r = zeros(n,1);
             else
                 r = -1*v.^(p-1)/(sum(v.^p)^(1-1/p));
+                r(r==inf) = 0;
+                r(r==-inf) = 0;
             end
         end
         

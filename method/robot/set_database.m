@@ -1,8 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% set_database.m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-datadirname_root = '/home/cliang/work/database/re-id/';  % indicate path that contains your dataset
-featuredirname_root = './temp/Features/'; % indicate root path to save features
 
 switch sys.database
     case 1 

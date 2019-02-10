@@ -43,21 +43,21 @@ while 1
 %     [~, J_smooth(1, iter_times), J_fitting(1, iter_times)] = ...
 %         obj_func(f, zero_v, y, W, model_para);
     
-%     % manifold ranking
-%     if iter_times==1
-%         v_zero = zeros(node_set_num,1);
-%         f_mr(:,1) = solve_f(v_zero, y, W, model_para);
-% 
-%         y_labeled = zeros(size(y));
-%         y_labeled(labeled_gallery_set) = y(labeled_gallery_set);
-%         f_mr(:,2) = solve_f(v_zero, y_labeled, W, model_para);
-%     end
-% 
-%     break; % check ctrl_para.exp.v_sum_constraint = true;
-    if iter_times>=outer_loop_max_iter_times || ...
-            abs(J_val(1, iter_times)-J_val(2, iter_times))<epsilon_J     
-        break;
+    % manifold ranking
+    if iter_times==1
+        v_zero = zeros(node_set_num,1);
+        f_mr(:,1) = solve_f([], v_zero, y, W, model_para);
+
+        y_labeled = zeros(size(y));
+        y_labeled(labeled_gallery_set) = y(labeled_gallery_set);
+        f_mr(:,2) = solve_f([], v_zero, y_labeled, W, model_para);
     end
+
+    break; % check ctrl_para.exp.v_sum_constraint = true;
+%     if iter_times>=outer_loop_max_iter_times || ...
+%             abs(J_val(1, iter_times)-J_val(2, iter_times))<epsilon_J     
+%         break;
+%     end
 end
     
 

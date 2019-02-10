@@ -3,11 +3,14 @@
 clear all
 clc
 
-% addpath('GOG/');
-% addpath('GOG/mex');
-% addpath('XQDA/');
-% addpath('DataManage/');
-% addpath('cliang_test/');
+init_environment;
+
+temp_dir = ['.' slash 'temp' slash];
+if ~exist(temp_dir, 'dir'), mkdir(temp_dir); end
+
+featuredirname_root = [temp_dir 'Features' slash];
+if ~exist(featuredirname_root, 'dir'), mkdir(featuredirname_root); end
+
 show_step = 50;
 
 %% configuraiton of datasets. 

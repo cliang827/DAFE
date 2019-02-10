@@ -1,6 +1,6 @@
 function [Eq_12, Eq_15, Eq_18, Eq_21, Eq_22] = ...
     Eq_func2(v, L_hat, gamma, L_hat_plus, L_hat_minus, d_hat, vt, p, regu_method, epsilon)
-% save('./temp/Eq_func2.mat', 'v', 'L_hat', 'gamma', 'L_hat_plus', 'L_hat_minus', 'd_hat', 'vt', 'p', 'regu_method', 'epsilon');
+save('./temp/Eq_func2.mat', 'v', 'L_hat', 'gamma', 'L_hat_plus', 'L_hat_minus', 'd_hat', 'vt', 'p', 'regu_method', 'epsilon');
 
 % clear
 % clc

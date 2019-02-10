@@ -13,8 +13,8 @@ if ~exist(ctrl_para.dir_info.temp_dir, 'dir'), mkdir(ctrl_para.dir_info.temp_dir
 ctrl_para.dir_info.data_dir = ['.' slash 'data' slash];
 if ~exist(ctrl_para.dir_info.data_dir, 'dir'), error('no data file!'); end
 
-ctrl_para.dir_info.data_file = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
-data_file = load(ctrl_para.dir_info.data_file, ...
+ctrl_para.dir_info.data_file_dir = [ctrl_para.dir_info.data_dir curr_dataset.source '.mat'];
+data_file = load(ctrl_para.dir_info.data_file_dir, ...
     'testimagenames_set', 'testcamIDs_set', ...
     'probe_feat_set', 'gallery_feat_set', ...
     'robot_dist_set', 'groundtruth_rank_set');
@@ -28,10 +28,10 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
  
 
 %% set search ranges of model and experiment parameters
-ctrl_para.exp.fb_method_set = {'f-only'}; 
+ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; %{'f-only', 'v-only', 'top-k-then-v', 'rank(v)/rank(f)'}; 
 ctrl_para.exp.alpha_set = 1e-1; %[1e-2 1e-1 1e0 1e1];
-ctrl_para.exp.beta_percentage_set = 0.05; %[0.05 0.1 0.5 1]; 
-ctrl_para.exp.gamma_set = 0; 
+ctrl_para.exp.beta_percentage_set = 0.05; %[0.01 0.02 0.03 0.04 0.05 0.1 0.2 0.5]; 
+ctrl_para.exp.gamma_set = 1e0;%[1e-2 1e-1 1e0 1e1 1e2]; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 ctrl_para.exp.tot_query_times = 2;
 if debug_flag
@@ -40,7 +40,7 @@ if debug_flag
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
 else
-    ctrl_para.exp.fb_num_set = 1:2:10;
+    ctrl_para.exp.fb_num_set = 2:2:10;
     ctrl_para.exp.trial_set = 1:2:10;
     ctrl_para.exp.show_progress_flag = false;
     ctrl_para.exp.show_figure_flag = false;
@@ -131,12 +131,13 @@ end
 eval_para.result_file = ctrl_para.dir_info.result_file;
 eval_para.show_figure_flag = ctrl_para.exp.show_figure_flag;
 eval_para.show_table_flag = ctrl_para.exp.show_table_flag;
-eval_para.trial_num = trial_num;
+% eval_para.trial_num = trial_num;
+eval_para.trial_set = ctrl_para.exp.trial_set;
 eval_para.v_sum_constraint = ctrl_para.exp.v_sum_constraint;
 eval_para.tot_query_times = ctrl_para.exp.tot_query_times;
 eval_para.probe_set_num = curr_dataset.probe_set_num;
 eval_para.gallery_set_num = curr_dataset.gallery_set_num;
 eval_para.machine_type = machine_type;
 eval_para.fb_num_set = ctrl_para.exp.fb_num_set;
-eval_para.data_file = ctrl_para.dir_info.data_file;
+eval_para.data_file_dir = ctrl_para.dir_info.data_file_dir;
 eval_para.groundtruth_rank = curr_dataset.groundtruth_rank;

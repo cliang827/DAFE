@@ -90,6 +90,7 @@ for i=1:probe_set_num
         if 1==query_times
             % parameter: y0
             y0 = zeros(node_set_num,1);
+%             y0 = f0;
             
         else
             y0 = f0;  

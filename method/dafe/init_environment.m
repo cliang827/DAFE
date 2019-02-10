@@ -7,6 +7,7 @@ switch OS
             % cliang's laptop
             machine_type = 'x270';
             curr_working_dir = '/home/cliang/work/code/test/reid/DAFE-git/';
+            datadirname_root = '/home/cliang/work/database/re-id/';  % only for feature extration
             slash ='/';
             if ~exist('run_mode', 'var'), run_mode = 'serial'; end
             if ~exist('debug_flag', 'var'), debug_flag = true; end
@@ -28,6 +29,7 @@ switch OS
             % cliang's mmap-pc
             machine_type = 'mmap-pc';            
             curr_working_dir = 'D:\work\code\test\DAFE\';
+            datadirname_root = 'D:\work\database\re-id\';  % only for feature extration
             slash ='\';
             if ~exist('run_mode', 'var'), run_mode = 'parallel'; end
             if ~exist('debug_flag', 'var'), debug_flag = false;  end
@@ -47,8 +49,6 @@ switch OS
 end
 cd(curr_working_dir);
 addpath(genpath(fullfile(curr_working_dir)));
-
-
 
 %% open parallel/serial
 if strcmp(run_mode, 'parallel')==1 

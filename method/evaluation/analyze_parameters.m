@@ -1,6 +1,6 @@
 function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
 save('./temp/analyze_parameters.mat', 'result_mat_file');
-%  
+ 
 % close all
 % clear
 % clc
@@ -12,14 +12,15 @@ load(result_mat_file);
 show_baseline_flag = exist('auc_score_baseline', 'var');
 show_figure_flag = eval_para.show_figure_flag;
 show_table_flag = eval_para.show_table_flag;
-trial_num = eval_para.trial_num;
+trial_set = eval_para.trial_set;
+trial_num = length(trial_set);
 % v_sum_constraint = eval_para.v_sum_constraint;
 tot_query_times = eval_para.tot_query_times;
 probe_set_num = eval_para.probe_set_num;
 gallery_set_num = eval_para.gallery_set_num;
 % machine_type = eval_para.machine_type; 
 fb_num_set = eval_para.fb_num_set;
-data_file = eval_para.data_file;
+data_file_dir = eval_para.data_file_dir;
 
 feedback_method = para_test_set{1,1};
 paras = cell2mat(para_test_set(:,2:6));
@@ -113,7 +114,7 @@ clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_tem
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'alpha-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+filter.column.name_set = 'feedback_method'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 [paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
     para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
@@ -185,6 +186,58 @@ switch filter.column.name_set
                 ylabel('auc');
                 legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
                 title(sprintf('log10(alpha)=%.1f, qt=%d',log_alpha_set(i), qt));
+            end
+        end
+        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
+        if ~show_figure_flag, close(hfig); end
+    
+    case 'beta-fb_num'
+        hfig = figure;
+        ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
+        ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
+        beta_set = unique(beta);
+        beta_num = length(beta_set);
+        for i = 1:beta_num
+            ix = find(beta==beta_set(i));
+            for qt=1:tot_query_times
+                subplot(beta_num,tot_query_times,(i-1)*tot_query_times+qt);
+                plot(fb_num_set, auc_y(ix,qt), 'ko--'); hold on;
+                plot(fb_num_set, auc_f_mr1(ix,qt), 'bs-.'); hold on;
+                plot(fb_num_set, auc_f_mr1(ix,qt), 'gs-.'); hold on;
+                plot(fb_num_set, auc_f(ix,qt), 'r*-'); hold on; grid on;
+%                 axis([-Inf Inf ymin ymax]);
+                set(gca, 'xtick', fb_num_set);
+                set(gca,'xticklabel',num2cell(fb_num_set));
+                xlabel('fb\_num');
+                ylabel('auc');
+                legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
+                title(sprintf('beta percentage=%.2f%%, qt=%d',100*beta_set(i), qt));
+            end
+        end
+        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
+        if ~show_figure_flag, close(hfig); end
+        
+    case 'gamma-fb_num'
+        hfig = figure;
+        ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
+        ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
+        log_gamma_set = unique(log_gamma);
+        gamma_num = length(log_gamma_set);
+        for i = 1:gamma_num
+            ix = find(log_gamma==log_gamma_set(i));
+            for qt=1:tot_query_times
+                subplot(gamma_num,tot_query_times,(i-1)*tot_query_times+qt);
+                plot(fb_num_set, auc_y(ix,qt), 'ko--'); hold on;
+                plot(fb_num_set, auc_f_mr1(ix,qt), 'bs-.'); hold on;
+                plot(fb_num_set, auc_f_mr1(ix,qt), 'gs-.'); hold on;
+                plot(fb_num_set, auc_f(ix,qt), 'r*-'); hold on; grid on;
+%                 axis([-Inf Inf ymin ymax]);
+                set(gca, 'xtick', fb_num_set);
+                set(gca,'xticklabel',num2cell(fb_num_set));
+                xlabel('fb\_num');
+                ylabel('auc');
+                legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
+                title(sprintf('log10(gamma)=%.1f, qt=%d',log_gamma_set(i), qt));
             end
         end
         saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
@@ -304,8 +357,8 @@ switch filter.column.name_set
             tab_column_name{1,end} = 'improvement';
 
             tab_row_name = cell(probe_set_num,1);
-            data_file = load(data_file);
-            robot_feedback_score = data_file.feedback_score_set{1};
+            data_file = load(data_file_dir);
+            robot_feedback_score = dist2sim(data_file.robot_dist_set{trial_set});
             for i=1:probe_set_num
                 tab_row_name{i} = num2str(i);
                 for qt=2:tot_query_times
