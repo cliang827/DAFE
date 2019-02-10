@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'VIPeR';
+dataset_name = 'CUHK03detected';
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
@@ -120,7 +120,7 @@ for i=1:para_test_num
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     
     if debug_flag
-        curr_dataset.probe_set_num = 316;
+%         curr_dataset.probe_set_num = 316;
         curr_dataset.groundtruth_rank = curr_dataset.groundtruth_rank(:,1:curr_dataset.probe_set_num);
     end
     
