@@ -1,11 +1,11 @@
 # Matlab
-/data
-!/data/DB/
-/temp
-/result
 *.mat
 *.fig
 *.txt
 *.m~
 *.sh~
 *.log~
+/data
+!/data/DB/
+/temp
+/result

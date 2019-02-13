@@ -39,9 +39,17 @@ assert(0==p); % assure A is positive-definite. Large V (>=1) values may trigger 
 % epsilon = 1e-6;
 H = 2*A;
 z = -b;
-Aeq = zeros(1,n);
-Aeq(n) = 1;
-beq = 1;
+% if isempty(f0)
+    Aeq = zeros(1,n);
+    Aeq(1,n) = 1;
+    beq = 1;
+% else
+%     Aeq = zeros(2,n);
+%     Aeq(1,n) = 1;
+%     Aeq(2,:) = ones(1,n);
+%     beq = [1;sum(f0)];
+% end
+
 lb = zeros(n,1);
 ub = ones(n,1);
 options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');

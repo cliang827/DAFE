@@ -20,7 +20,7 @@ for database_id = 1%[1 2 6 7 4 5]
     sys.database = database_id;
     
     if sys.database == 6 || sys.database == 7
-        sys.setnum = 20;    % random division times
+        sys.setnum = 20;    % random division timesw
     else
         sys.setnum = 10;
     end
@@ -55,46 +55,46 @@ for database_id = 1%[1 2 6 7 4 5]
     end
 
 
-%     %% extract feature for all images.
-%     fprintf('*** low level feature extraction *** \n');
-%     fprintf('database = %s \n', databasename );
-%     fprintf('+ extract feature for all images \n');
-%     for f = 1:parFea.featurenum
-%         if parFea.usefeature(f) == 1
-%             param = parFea.featureConf{f};
-%             fprintf('feature = %d [ %s ] \n', f, param.name);
-%             feature_all = zeros( allimagenums, param.dimension );
-% 
-%             t0 = tic;
-%             nchar = 0;
-%             for imgind = 1:allimagenums
-%                 if mod(imgind, show_step) == 0
-%                     nchar = fprintf('imgind = %d / %d \n', imgind, allimagenums); 
-%                 end
-% 
-%                 X = imread( strcat(datadirname, allimagenames{imgind})); % load image
-%                 if size(X, 1) ~= H0 || size(X, 2) ~= W0; X = imresize(X, [H0 W0]); end % resize
-% 
-%                 feature_all(imgind, :) = GOG(X, param); % extract GOG
-% 
-%                 if mod(imgind, show_step) == show_step-1
-%                     fprintf(1, repmat('\b', 1, nchar));
-%                 end
-%             end
-%             fprintf(1, repmat('\b', 1, nchar));
-%             fprintf(1, 'done!\n');
-% 
-%             feaTime = toc(t0);
-%             meanTime = feaTime/allimagenums;
-%             fprintf('mean feature extraction time %.3f seconds per image\n', meanTime);
-% 
-%             name1 = sprintf('feature_all_%s', param.name );
-%             name = strcat( featuredirname, databasename, '_',  name1, '.mat');
-%             fprintf('%s \n', name);
-% 
-%             save( name,  'feature_all', '-v7.3' );
-%         end
-%     end
+    %% extract feature for all images.
+    fprintf('*** low level feature extraction *** \n');
+    fprintf('database = %s \n', databasename );
+    fprintf('+ extract feature for all images \n');
+    for f = 1:parFea.featurenum
+        if parFea.usefeature(f) == 1
+            param = parFea.featureConf{f};
+            fprintf('feature = %d [ %s ] \n', f, param.name);
+            feature_all = zeros( allimagenums, param.dimension );
+
+            t0 = tic;
+            nchar = 0;
+            for imgind = 1:allimagenums
+                if mod(imgind, show_step) == 0
+                    nchar = fprintf('imgind = %d / %d \n', imgind, allimagenums); 
+                end
+
+                X = imread( strcat(datadirname, allimagenames{imgind})); % load image
+                if size(X, 1) ~= H0 || size(X, 2) ~= W0; X = imresize(X, [H0 W0]); end % resize
+
+                feature_all(imgind, :) = GOG(X, param); % extract GOG
+
+                if mod(imgind, show_step) == show_step-1
+                    fprintf(1, repmat('\b', 1, nchar));
+                end
+            end
+            fprintf(1, repmat('\b', 1, nchar));
+            fprintf(1, 'done!\n');
+
+            feaTime = toc(t0);
+            meanTime = feaTime/allimagenums;
+            fprintf('mean feature extraction time %.3f seconds per image\n', meanTime);
+
+            name1 = sprintf('feature_all_%s', param.name );
+            name = strcat( featuredirname, databasename, '_',  name1, '.mat');
+            fprintf('%s \n', name);
+
+            save( name,  'feature_all', '-v7.3' );
+        end
+    end
 
     %% compute g2p_dist and g2g_dist
     t2 = tic;

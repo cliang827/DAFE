@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'CUHK03detected';
+dataset_name = 'CUHK03detected'; 
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
@@ -31,7 +31,7 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
 ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; %{'f-only', 'v-only', 'top-k-then-v', 'rank(v)/rank(f)'}; 
 ctrl_para.exp.alpha_set = 1e-1; %[1e-2 1e-1 1e0 1e1];
 ctrl_para.exp.beta_percentage_set = 0.05; %[0.01 0.02 0.03 0.04 0.05 0.1 0.2 0.5]; 
-ctrl_para.exp.gamma_set = 1e0;%[1e-2 1e-1 1e0 1e1 1e2]; 
+ctrl_para.exp.gamma_set = 1e-2;%[1e-2 1e-1 1e0 1e1 1e2]; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 ctrl_para.exp.tot_query_times = 2;
 if debug_flag
@@ -45,9 +45,9 @@ else
     ctrl_para.exp.show_progress_flag = false;
     ctrl_para.exp.show_figure_flag = false;
 end
-ctrl_para.exp.show_table_flag = true;
+ctrl_para.exp.show_table_flag = false;
 
-ctrl_para.exp.v_sum_constraint = false;
+ctrl_para.exp.v_sum_constraint = true;
 ctrl_para.exp.include_groundtruth_flag = false;
 ctrl_para.exp.rank_threshold = 20;
 ctrl_para.exp.machine_type = machine_type;
@@ -57,8 +57,9 @@ ctrl_para.exp.batch_size = batch_size;
 
 ctrl_para.model.tau = 0.1;                               % used for PCM'14 initialization
 ctrl_para.model.p = 0.9;
-ctrl_para.model.regu_method = 'cvpr07_spectral_matting'; %'cvpr07_spectral_matting';
-
+ctrl_para.model.regu_method = 'cvpr07_spectral_matting'; 
+%'cvpr07_spectral_matting'; 'negative_p_norm'; 'positive_1_norm';
+          
 %% construct parameter grid for searching the optimal configuration
 method_num = length(ctrl_para.exp.fb_method_set);
 alpha_num = length(ctrl_para.exp.alpha_set);

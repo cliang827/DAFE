@@ -134,7 +134,7 @@ else
     auc_f_mr1_filtered = mean(auc_f_mr1,1);
     auc_f_mr2_filtered = mean(auc_f_mr2,1);
     auc_f_filtered = mean(auc_f,1);
-    auc_f_h1_filtered = mean(auc_f_mr1,1);
+    auc_f_h1_filtered = mean(auc_f_h1,1);
     auc_f_h2_filtered = mean(auc_f_h2,1);
     auc_f_h3_filtered = mean(auc_f_h3,1);
     auc_mr_filtered = mean(auc_mr,1);

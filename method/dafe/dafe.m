@@ -19,14 +19,8 @@ node_set_num = dataset.node_set_num;
 probe_feat = dataset.probe_feat;
 gallery_feat = dataset.gallery_feat;
 feat_dim = dataset.feat_dim;
-
-robot_feedback_score = dist2sim(dataset.robot_dist);
-% g2g_sim = dataset.g2g_sim;
-% g2p_sim = dataset.g2p_sim;
 gallery_name_tab = dataset.gallery_name_tab;
-
-% sim_mat = zeros(node_set_num, node_set_num);
-% sim_mat(1:gallery_set_num, 1:gallery_set_num) = g2g_sim;
+robot_feedback_score = dist2sim(dataset.robot_dist);
 
 reid_score_y = zeros(gallery_set_num, probe_set_num, tot_query_times);
 reid_score_f = zeros(gallery_set_num, probe_set_num, tot_query_times);
@@ -40,6 +34,19 @@ suggest_feedback_id_tab = cell(probe_set_num, tot_query_times);
 suggest_feedback_name_tab = cell(probe_set_num, tot_query_times);
 query_time_tab = zeros(probe_set_num, tot_query_times);
 iter_time_tab = zeros(probe_set_num, tot_query_times);
+
+model_para.alpha = alpha*ones(node_set_num,1);
+model_para.gamma = gamma;
+model_para.p = ctrl_para.model.p;
+model_para.regu_method = ctrl_para.model.regu_method;
+model_para.expected_feedback_num = ctrl_para.model.fb_num;
+model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
+model_para.node_set_num = dataset.node_set_num;
+
+v0 = zeros(node_set_num,1);
+% y0 = [zeros(gallery_set_num,1);1];
+
+
 
 for i=1:probe_set_num
     if show_progress_flag && (mod(i,10)==0 || i==1)
@@ -84,51 +91,35 @@ for i=1:probe_set_num
         f0(end) = 1;
         f0(1:end) = range_normalization(f0(1:end));
         
-        % parameter: v0
-        v0 = zeros(node_set_num,1);
-            
-        if 1==query_times
-            % parameter: y0
-            y0 = zeros(node_set_num,1);
-%             y0 = f0;
-            
+        if 1 == query_times
+            y0 = [zeros(gallery_set_num,1);1];
         else
-            y0 = f0;  
+%             y0 = f0;
+%             y0(labeled_gallery_set) = feedback_scores;
         end
         
-        y0(labeled_gallery_set) = feedback_scores;
-        
-        % parameter: alpha
-        model_para.alpha = alpha*ones(node_set_num,1);
-
         % parameter: beta
         P = diag(sum(W,2));
         f_normalized = sqrt(P)\f0; % eq.(31) in TR17
         ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
         smooth_loss = W.*ff.*ff;
-        fitting_loss = repmat(model_para.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
-            repmat(model_para.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
+        fitting_loss = repmat(alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
+            repmat(alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
         total_loss = smooth_loss + fitting_loss;
         total_loss(labeled_gallery_set,:) = []; 
         total_loss(:,labeled_gallery_set) = []; 
         sorted_total_loss = sort(total_loss(:), 'descend');
         sorted_total_loss = sorted_total_loss(1:2:end);
         model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
-
-        % parameter: gamma
-        model_para.gamma = gamma;
-
+ 
         % others parameters
-        model_para.p = ctrl_para.model.p;
-        model_para.regu_method = ctrl_para.model.regu_method;
-        model_para.expected_feedback_num = ctrl_para.model.fb_num;
-        model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
         model_para.labeled_gallery_set = labeled_gallery_set;
         model_para.unlabeled_gallery_set = unlabeled_gallery_set;
-        model_para.node_set_num = dataset.node_set_num;
+        model_para.y_labeled = y0;
+        model_para.y_labeled(labeled_gallery_set) = feedback_scores;
 
         [f, v, f_mr, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
-        y = f0; y(end) = [];
+        y = f0(1:gallery_set_num);
 
         %% result collection
         reid_score_f_mr1(:,i,query_times) = f_mr(1:gallery_set_num,1);
@@ -165,9 +156,6 @@ for i=1:probe_set_num
 end    
 time_result.time_by_round = mean(query_time_tab,1);
 time_result.time_in_total = sum(query_time_tab(:));
-
-% a = reid_score_f - reid_score_f_h2;
-% assert(abs(max(a(:)))==0);
 
 %%
 reid_score.y = reid_score_y;

@@ -1,7 +1,6 @@
 function [J, item_smooth, item_fitting, item_pace, item_sparse] = obj_func(f, v, y, W, model_para)
 
 
-
 alpha = diag(model_para.alpha);
 beta = model_para.beta;
 gamma = model_para.gamma;
@@ -23,5 +22,6 @@ item_pace = ones(1,m)*(beta*v_tilde)*ones(m,1)/(m*m);
 item_sparse = gamma*regu(v,p,0,regu_method)/m;
 
 J = item_smooth+item_fitting-item_pace+item_sparse;
+
 
 

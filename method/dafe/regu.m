@@ -90,7 +90,7 @@ switch method
         end
         
     case 'positive_1_norm'
-        assert(1==p)
+        p = 1;
         if order == 0
             r = norm(v,1);
         elseif order == 1
