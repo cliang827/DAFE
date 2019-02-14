@@ -35,6 +35,7 @@ suggest_feedback_name_tab = cell(probe_set_num, tot_query_times);
 query_time_tab = zeros(probe_set_num, tot_query_times);
 iter_time_tab = zeros(probe_set_num, tot_query_times);
 
+% model_para.alpha = [zeros(gallery_set_num,1);1];
 model_para.alpha = alpha*ones(node_set_num,1);
 model_para.gamma = gamma;
 model_para.p = ctrl_para.model.p;
@@ -44,17 +45,16 @@ model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
 model_para.node_set_num = dataset.node_set_num;
 
 v0 = zeros(node_set_num,1);
-% y0 = [zeros(gallery_set_num,1);1];
+y0 = [zeros(gallery_set_num,1);1];
 
-
-
+show_progress_step = 10;
 for i=1:probe_set_num
-    if show_progress_flag && (mod(i,10)==0 || i==1)
+    
+    if show_progress_flag && (mod(i,show_progress_step)==0 || i==1)
         nchar = fprintf(1, 'progress=%d/%d (%3.0f%%) ...', i, probe_set_num, 100*i/probe_set_num);
     end
     
     node_feat = cat(1, gallery_feat, probe_feat(i,:));
-     
     feedback_scores = [];
     labeled_gallery_set = [];
     
@@ -83,21 +83,16 @@ for i=1:probe_set_num
             M = similarity_learning(M, pairwise_ix_set, node_feat, 'oasis');
         end
         W = node_feat*M*node_feat';
-        I = eye(node_set_num);
-        W(I==1) = 0;
- 
+        W(eye(node_set_num)==1) = 0;
+        
         % parameter: f0
-        f0 = W(:,end); 
+%         f0 = ones(node_set_num,1); 
+%         f0(1:gallery_set_num) = range_normalization(W(1:gallery_set_num,end));
+        f0 = W(:,end);
         f0(end) = 1;
-        f0(1:end) = range_normalization(f0(1:end));
-        
-        if 1 == query_times
-            y0 = [zeros(gallery_set_num,1);1];
-        else
-%             y0 = f0;
-%             y0(labeled_gallery_set) = feedback_scores;
-        end
-        
+        f0 = range_normalization(f0);
+
+
         % parameter: beta
         P = diag(sum(W,2));
         f_normalized = sqrt(P)\f0; % eq.(31) in TR17
@@ -117,6 +112,8 @@ for i=1:probe_set_num
         model_para.unlabeled_gallery_set = unlabeled_gallery_set;
         model_para.y_labeled = y0;
         model_para.y_labeled(labeled_gallery_set) = feedback_scores;
+        model_para.y_labeled_v2 = f0;
+        model_para.y_labeled_v2(labeled_gallery_set) = feedback_scores;
 
         [f, v, f_mr, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
         y = f0(1:gallery_set_num);
@@ -150,7 +147,7 @@ for i=1:probe_set_num
         query_time_tab(i, query_times) = toc(start_time);
     end
  
-    if show_progress_flag && mod(i,10)==9
+    if show_progress_flag && mod(i,show_progress_step)==show_progress_step-1
         fprintf(1, repmat('\b', 1, nchar));
     end
 end    

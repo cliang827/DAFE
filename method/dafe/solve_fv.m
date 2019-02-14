@@ -13,7 +13,7 @@ outer_loop_max_iter_times = 3;
 
 node_set_num = model_para.node_set_num;
 v_zero = zeros(node_set_num,1);
-y_labeled = model_para.y_labeled;
+y_labeled = model_para.y_labeled_v2;
 
 J_val = zeros(2, outer_loop_max_iter_times);
 J_details = zeros(2, outer_loop_max_iter_times);
