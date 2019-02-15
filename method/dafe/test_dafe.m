@@ -63,7 +63,7 @@ switch run_mode
         time_in_parallel = toc(t_start);
         save(result_file, 'para_test_set', 'eval_para', 'reid_score', 'difficulty_score', ...
             'auc_score', 'feedback_id', 'time_result', 'time_in_parallel', '-v7.3');
-        [time_in_serial, time_each_probe] = analyze_parameters(result_file);
+        [ time_in_serial, time_each_probe] = analyze_parameters(result_file);
         fprintf(1, '\n time_in_parallel=%.0f sec, time_in_total_serial=%.0f sec., time_each_probe:%.2f sec\n', ...
             time_in_parallel, time_in_serial, time_each_probe);
 end

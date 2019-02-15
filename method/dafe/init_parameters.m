@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'CUHK03detected'; %'GRID'; %'PRID450s'; %'CUHK03labeled'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
+dataset_name = 'PRID450s'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
@@ -30,7 +30,7 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
 %% set search ranges of model and experiment parameters
 ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; %{'f-only', 'v-only', 'top-k-then-v', 'rank(v)/rank(f)'}; 
 ctrl_para.exp.alpha_set = 1e-1; %[1e-2 1e-1 1e0 1e1];
-ctrl_para.exp.beta_percentage_set = 0.02; %[0.01 0.02 0.03 0.04 0.05 0.1 0.2 0.5]; 
+ctrl_para.exp.beta_percentage_set = 0.2; %[0.01 0.02 0.03 0.04 0.05 0.1 0.2 0.5]; 
 ctrl_para.exp.gamma_set = 1e-2;%[1e-2 1e-1 1e0 1e1 1e2]; 
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 ctrl_para.exp.tot_query_times = 2;

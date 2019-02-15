@@ -1,4 +1,4 @@
-function [v, fval_rec, L] = solve_v(f, v, y, W, model_para)
+function [v, beta, fval_rec, L] = solve_v(f, v, y, W, model_para)
 % save('./temp/solve_v.mat', 'f', 'v', 'y', 'W', 'model_para');
 
 % clear 
@@ -8,7 +8,7 @@ debug_flag = 0;
 
 v_sum_constraint_flag = model_para.v_sum_constraint_flag;
 alpha = model_para.alpha;
-beta = model_para.beta;
+beta_percentage = model_para.beta_percentage;
 p = model_para.p;
 regu_method = model_para.regu_method;
 expected_feedback_num = model_para.expected_feedback_num;
@@ -18,10 +18,11 @@ n = model_para.node_set_num;
 
 epsilon = 1e-6; 
 gamma_cav = 0;
+% gamma_cvx = 0;
 gamma_cvx = model_para.gamma;
 
 if debug_flag
-%     gamma_cvx = beta+epsilon;
+    gamma_cav = 0;
     gamma_cvx = 0;
 end
 
@@ -30,6 +31,17 @@ f_normalized = sqrt(P)\f;
 ff = repmat(f_normalized,[1 n])-repmat(f_normalized',[n 1]);
 alpha_fY = repmat(alpha.*(f-y).*(f-y), [1 n]) + repmat(alpha'.*(f-y)'.*(f-y)',[n 1]);
 L = W.*ff.*ff + alpha_fY;
+
+% if debug_flag
+    L_temp = L;
+    L_temp(labeled_gallery_ix,:) = [];
+    L_temp(:,labeled_gallery_ix) = [];
+    sorted_L_temp = sort(L_temp(:), 'descend');
+    sorted_L_temp = sorted_L_temp(1:2:end);
+    beta = sorted_L_temp(max(1,floor(beta_percentage*length(sorted_L_temp))));
+% end
+
+
 L_hat = L-beta;
 
 if debug_flag

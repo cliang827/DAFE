@@ -6,9 +6,6 @@ function [reid_score, difficulty_score, auc_score, suggest_feedback_id_tab, time
 % clc
 % load('./temp/dafe.mat');
 
-alpha = ctrl_para.model.alpha;
-beta_percentage = ctrl_para.model.beta_percentage;
-gamma = ctrl_para.model.gamma;
 
 show_progress_flag = ctrl_para.exp.show_progress_flag;
 tot_query_times = ctrl_para.exp.tot_query_times;
@@ -35,9 +32,9 @@ suggest_feedback_name_tab = cell(probe_set_num, tot_query_times);
 query_time_tab = zeros(probe_set_num, tot_query_times);
 iter_time_tab = zeros(probe_set_num, tot_query_times);
 
-% model_para.alpha = [zeros(gallery_set_num,1);1];
-model_para.alpha = alpha*ones(node_set_num,1);
-model_para.gamma = gamma;
+model_para.alpha = ctrl_para.model.alpha*ones(node_set_num,1);
+model_para.beta_percentage = ctrl_para.model.beta_percentage;
+model_para.gamma = ctrl_para.model.gamma;
 model_para.p = ctrl_para.model.p;
 model_para.regu_method = ctrl_para.model.regu_method;
 model_para.expected_feedback_num = ctrl_para.model.fb_num;
@@ -89,20 +86,6 @@ for i=1:probe_set_num
         f0 = ones(node_set_num,1); 
         f0(1:gallery_set_num) = range_normalization(W(1:gallery_set_num,end));
 
-        % parameter: beta
-        P = diag(sum(W,2));
-        f_normalized = sqrt(P)\f0; % eq.(31) in TR17
-        ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
-        smooth_loss = W.*ff.*ff;
-        fitting_loss = repmat(alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
-            repmat(alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
-        total_loss = smooth_loss + fitting_loss;
-        total_loss(labeled_gallery_set,:) = []; 
-        total_loss(:,labeled_gallery_set) = []; 
-        sorted_total_loss = sort(total_loss(:), 'descend');
-        sorted_total_loss = sorted_total_loss(1:2:end);
-        model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
- 
         % others parameters
         model_para.labeled_gallery_set = labeled_gallery_set;
         model_para.unlabeled_gallery_set = unlabeled_gallery_set;
