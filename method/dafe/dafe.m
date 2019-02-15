@@ -46,7 +46,6 @@ model_para.node_set_num = dataset.node_set_num;
 
 v0 = zeros(node_set_num,1);
 y0 = [zeros(gallery_set_num,1);1];
-% y0(labeled_gallery_set) = feedback_scores;
 
 show_progress_step = 10;
 for i=1:probe_set_num
@@ -87,14 +86,8 @@ for i=1:probe_set_num
         W(eye(node_set_num)==1) = 0;
         
         % parameter: f0
-%         f0 = ones(node_set_num,1); 
-%         f0(1:gallery_set_num) = range_normalization(W(1:gallery_set_num,end));
-        f0 = W(:,end);
-        f0(end) = 1;
-        f0 = range_normalization(f0);
-        
-        
-
+        f0 = ones(node_set_num,1); 
+        f0(1:gallery_set_num) = range_normalization(W(1:gallery_set_num,end));
 
         % parameter: beta
         P = diag(sum(W,2));
