@@ -6,7 +6,6 @@ save('./temp/analyze_parameters.mat', 'result_mat_file');
 % clc
 % load('./temp/analyze_parameters.mat');
 
-
 load(result_mat_file);
 
 show_baseline_flag = exist('auc_score_baseline', 'var');
@@ -14,30 +13,36 @@ show_figure_flag = eval_para.show_figure_flag;
 show_table_flag = eval_para.show_table_flag;
 trial_set = eval_para.trial_set;
 trial_num = length(trial_set);
-% v_sum_constraint = eval_para.v_sum_constraint;
 tot_query_times = eval_para.tot_query_times;
 probe_set_num = eval_para.probe_set_num;
 gallery_set_num = eval_para.gallery_set_num;
-% machine_type = eval_para.machine_type; 
 fb_num_set = eval_para.fb_num_set;
 data_file_dir = eval_para.data_file_dir;
 
-feedback_method = para_test_set{1,1};
-paras = cell2mat(para_test_set(:,2:6));
+paras = para_test_set(:,1:6);
 paras_num = size(paras,1);
 if trial_num>1
-    paras = unique(paras,'rows');
-    paras_num = paras_num/trial_num;
-    
-    auc_score = reshape(auc_score, trial_num, paras_num)';
-    difficulty_score = reshape(difficulty_score, trial_num, paras_num)';
-    feedback_id = reshape(feedback_id, trial_num, paras_num)';
-    time_result = reshape(time_result, trial_num, paras_num)';
-    
-    if show_baseline_flag
-        auc_score_baseline = reshape(auc_score_baseline, trial_num, paras_num)';
-    end
+    paras(cell2mat(para_test_set(:,end))>1,:)=[];
+    paras_num = size(paras,1);
 end
+
+feedback_method_set = unique(paras(:,1),'stable');
+for i=1:paras_num
+    feedback_method_name = paras{i,1};
+    ix = find(ismember(feedback_method_set, feedback_method_name));
+    paras{i,1} = ix;
+end
+paras = cell2mat(paras);
+    
+auc_score = reshape(auc_score, trial_num, paras_num)';
+difficulty_score = reshape(difficulty_score, trial_num, paras_num)';
+feedback_id = reshape(feedback_id, trial_num, paras_num)';
+time_result = reshape(time_result, trial_num, paras_num)';
+
+if show_baseline_flag
+    auc_score_baseline = reshape(auc_score_baseline, trial_num, paras_num)';
+end
+
 
 auc_f_mr1_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_mr2_temp = zeros(paras_num,tot_query_times,trial_num);
@@ -114,7 +119,7 @@ clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_tem
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'feedback_method'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+filter.column.name_set = 'feedback_method-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 [paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
     para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
@@ -141,6 +146,23 @@ fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
     sum(auc_f(:,tot_query_times)>auc_f(:,1)), size(paras,1));
 
 switch filter.column.name_set
+    case 'feedback_method-fb_num'
+        line_type = {'g^-.', 'bs-.', 'ko--', 'r*-'};
+        hfig = figure;
+        ax = axes;
+        n = size(paras,1);
+        legend_str = cell(n,1);
+        for i=1:n
+            plot(1:tot_query_times, 100*auc_f(i,:), line_type{i}); hold on;
+            legend_str{i} = feedback_method_set{paras(i,1)};
+        end
+        ytickformat(ax, 'percentage');
+        set(gca, 'xtick', 1:tot_query_times);
+        set(gca,'xticklabel',num2cell([1:tot_query_times]));
+        
+        legend(legend_str);        
+        
+        
     case 'alpha-beta-gamma'
         % figure 1: auc vs. alpha+beta+gamma (3D) and alpha-beta/alpha-gamma/beta-gamma (2D)
         draw_fig_auc_vs_alpha_beta_gamma;
@@ -287,7 +309,7 @@ switch filter.column.name_set
         if ~show_figure_flag, close(hfig); end
         
         
-    case 'feedback_method'
+    case 'single_method'
         %% method comparison - table version
         assert(size(auc_y,1)==1);
         auc_result = cat(1, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr);

@@ -5,8 +5,9 @@ function [paras_filtered, auc_y_filtered, auc_f_mr1_filtered, auc_f_mr2_filtered
     para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, ...
     auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, ...
     v_max, v_mean, v_std, filter)
-
-% save('./temp/para_filter.mat', 'paras', 'auc_y', 'auc_f_mr1', 'auc_f_mr2', 'auc_f', 'auc_f_h1', 'auc_f_h2', 'auc_f_h3', 'v_max', 'v_mean', 'v_std', 'filter');
+% save('./temp/para_filter.mat', 'paras', 'auc_y', 'auc_f_mr1', 'auc_f_mr2', ...
+%     'auc_f', 'auc_f_h1', 'auc_f_h2', 'auc_f_h3', 'auc_mr', 'auc_emr', ...
+%     'v_max', 'v_mean', 'v_std', 'filter');
 
 % clear
 % clc
@@ -75,24 +76,30 @@ v_std(invalid_para_ix==1,:) = [];
 
 %% column filter
 filter_column_ix = [];
-if ~isempty(strfind(filter.column.name_set, 'alpha'))
+
+if ~isempty(strfind(filter.column.name_set, 'feedback_method'))
     filter_column_ix = cat(2, filter_column_ix, 1);
 end
-if ~isempty(strfind(filter.column.name_set, 'beta'))
+if ~isempty(strfind(filter.column.name_set, 'alpha'))
     filter_column_ix = cat(2, filter_column_ix, 2);
 end
-if ~isempty(strfind(filter.column.name_set, 'gamma'))
+if ~isempty(strfind(filter.column.name_set, 'beta'))
     filter_column_ix = cat(2, filter_column_ix, 3);
 end
-if ~isempty(strfind(filter.column.name_set, 'delta'))
+if ~isempty(strfind(filter.column.name_set, 'gamma'))
     filter_column_ix = cat(2, filter_column_ix, 4);
 end
-if ~isempty(strfind(filter.column.name_set, 'fb_num'))
+if ~isempty(strfind(filter.column.name_set, 'delta'))
     filter_column_ix = cat(2, filter_column_ix, 5);
 end
+if ~isempty(strfind(filter.column.name_set, 'fb_num'))
+    filter_column_ix = cat(2, filter_column_ix, 6);
+end
+
+   
 
 if ~isempty(filter_column_ix)
-    paras_set = unique(paras(:,filter_column_ix),'rows');
+    paras_set = unique(paras(:,filter_column_ix),'stable', 'rows');
     n = size(paras_set,1);
     paras_filtered = zeros(n, size(paras,2));
     

@@ -57,7 +57,7 @@ if debug_flag
     [~, pp]=chol(L_hat_hat); 
     if pp==0
         H = 2*L_hat_hat;
-        f = -2*(sum(L_hat,2));
+        b = -2*(sum(L_hat,2));
         if v_sum_constraint_flag
             Aeq = zeros(2, n);
             Aeq(1,labeled_gallery_ix) = 1;
@@ -72,7 +72,7 @@ if debug_flag
         ub = ones(n,1);
         options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');
         H=(H+H')/2;
-        v_cvx = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],options);
+        v_cvx = quadprog(H,b,[],[],Aeq,beq,lb,ub,[],options);
         subplot(2,1,2); plot(v);
     end
 end
@@ -102,7 +102,7 @@ while 1
     end
     
     H = 2*L_hat_plus;
-    f = -1*(2*d_hat+2*L_hat_minus*vt-n*gamma_cav*partial_vt);
+    b = -1*(2*d_hat+2*L_hat_minus*vt-n*gamma_cav*partial_vt);
     if v_sum_constraint_flag
         Aeq = zeros(2, n);
         Aeq(1,labeled_gallery_ix) = 1;
@@ -116,7 +116,7 @@ while 1
     lb = zeros(n,1);
     ub = ones(n,1);
     options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');
-    v = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],options);
+    v = quadprog(H,b,[],[],Aeq,beq,lb,ub,[],options);
     assert(~isempty(v));
     
     v_history(:,iter_times) = v;
