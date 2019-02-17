@@ -18,6 +18,7 @@ probe_set_num = eval_para.probe_set_num;
 gallery_set_num = eval_para.gallery_set_num;
 fb_num_set = eval_para.fb_num_set;
 data_file_dir = eval_para.data_file_dir;
+groundtruth_rank = eval_para.groundtruth_rank;
 
 paras = para_test_set(:,1:6);
 paras_num = size(paras,1);
@@ -33,7 +34,8 @@ for i=1:paras_num
     paras{i,1} = ix;
 end
 paras = cell2mat(paras);
-    
+
+reid_score = reshape(reid_score, trial_num, paras_num)';
 auc_score = reshape(auc_score, trial_num, paras_num)';
 difficulty_score = reshape(difficulty_score, trial_num, paras_num)';
 feedback_id = reshape(feedback_id, trial_num, paras_num)';
@@ -43,7 +45,7 @@ if show_baseline_flag
     auc_score_baseline = reshape(auc_score_baseline, trial_num, paras_num)';
 end
 
-
+cmc_f_temp = zeros(paras_num, gallery_set_num, tot_query_times,trial_num);
 auc_f_mr1_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_mr2_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_h1_temp = zeros(paras_num,tot_query_times,trial_num);
@@ -58,6 +60,7 @@ v_mean_temp = zeros(paras_num,tot_query_times,trial_num);
 v_std_temp = zeros(paras_num,tot_query_times,trial_num);
 time_round_temp = zeros(paras_num,tot_query_times,trial_num);
 
+cmc_f = zeros(paras_num, gallery_set_num, tot_query_times);
 auc_f_mr1 = zeros(paras_num,tot_query_times);
 auc_f_mr2 = zeros(paras_num,tot_query_times);
 auc_f_h1 = zeros(paras_num,tot_query_times);
@@ -76,7 +79,10 @@ for i=1:paras_num
     for t=1:trial_num
         time_total = time_total+time_result{i,t}.time_in_total;
         time_round_temp(i,:,t) = time_result{i,t}.time_by_round;
-        
+
+        for qt = 1:tot_query_times
+            cmc_f_temp(i,:,qt,t) = result_evaluation(reid_score{i,t}.f(:,:,qt), groundtruth_rank); 
+        end
         auc_y_temp(i,:,t) = auc_score{i,t}.y;
         auc_f_mr1_temp(i,:,t) = auc_score{i,t}.f_mr1;
         auc_f_mr2_temp(i,:,t) = auc_score{i,t}.f_mr2;
@@ -96,6 +102,7 @@ for i=1:paras_num
         v_std_temp(i,:,t) = std(v);
     end
     
+    cmc_f(i,:,:) = mean(cmc_f_temp(i,:,:,:),4);
     auc_y(i,:) = mean(auc_y_temp(i,:,:),3);
     auc_f_mr1(i,:) = mean(auc_f_mr1_temp(i,:,:),3);
     auc_f_mr2(i,:) = mean(auc_f_mr2_temp(i,:,:),3);
@@ -120,8 +127,8 @@ clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_tem
 
 %% filter
 filter.column.name_set = 'feedback_method-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
-[paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
-    para_filter(paras, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
+[paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
+    para_filter(paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
 try assert(~isnan(paras(1,1)) && ~isempty(paras(1,1)));
 catch, error('wrong filter!'); end
@@ -147,20 +154,57 @@ fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
 
 switch filter.column.name_set
     case 'feedback_method-fb_num'
-        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};
+        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};        
         hfig = figure;
-        ax = axes;
+        for qt=1:tot_query_times
+            subplot(1,tot_query_times,qt);
+            for i=1:length(feedback_method_set)
+                plot(fb_num_set, auc_f(paras(:,1)==i,qt), line_type{i}); grid on; hold on;
+            end
+            set(gca, 'xtick', fb_num_set);
+            set(gca, 'xticklabel', num2cell(fb_num_set));
+            xlabel(sprintf('#feedbacks'));
+            ylabel('nAUC');
+            legend(feedback_method_set, 'location', 'northwest'); 
+            title(sprintf('query\\_times=%d', qt));
+        end        
+        
+        saveas(hfig, [result_mat_file(1:end-4), '-feedback_method-fb_num.fig']);
+        if ~show_figure_flag, close(hfig); end
+        
+    case 'feedback_method'
+        assert(length(fb_num_set)==1);
+        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};        
+        hfig = figure;
+        subplot(1,1+tot_query_times,1);
         n = size(paras,1);
         legend_str = cell(n,1);
         for i=1:n
-            plot(1:tot_query_times, 100*auc_f(i,:), line_type{i}); hold on;
+            plot(1:tot_query_times, auc_f(i,:), line_type{i}); grid on; hold on;
             legend_str{i} = feedback_method_set{paras(i,1)};
         end
-        ytickformat(ax, 'percentage');
         set(gca, 'xtick', 1:tot_query_times);
-        set(gca,'xticklabel',num2cell([1:tot_query_times]));
+        set(gca,'xticklabel',num2cell(1:tot_query_times));
+        xlabel(sprintf('query\\_times'));
+        ylabel('nAUC');
+        legend(legend_str, 'location', 'southeast');  
         
-        legend(legend_str);        
+        
+        line_type = {'g-.', 'b-.', 'k--', 'y--', 'r-'};
+        for qt = 1:tot_query_times
+            subplot(1,1+tot_query_times,1+qt);
+            for i=1:n
+                cmc_score = squeeze(cmc_f(i,:,qt));
+                plot(1:gallery_set_num, cmc_score, line_type{i}); grid on; hold on;
+            end
+            xlabel('rank');
+            ylabel('CMC');
+            axis([-Inf Inf 0 1.1]);
+            legend(legend_str, 'location', 'southeast');  
+            title(sprintf('query\\_times=%d', qt));
+        end
+        saveas(hfig, [result_mat_file(1:end-4), '-feedback_method.fig']);
+        if ~show_figure_flag, close(hfig); end
         
         
     case 'alpha-beta-gamma'
@@ -356,7 +400,7 @@ switch filter.column.name_set
             % LC: for condition of only one set of parameters!
             rank_detail = cell(probe_set_num, 2*tot_query_times+1);
             tab_column_name = cell(1, 2*tot_query_times+1);
-            groundtruth_rank = eval_para.groundtruth_rank;
+            
             for qt=1:tot_query_times
                 if qt==1
                     [~, ~, temp] = result_evaluation(reid_score{1,1}.y(:,:,qt), groundtruth_rank); 

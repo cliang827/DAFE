@@ -26,10 +26,10 @@ switch fb_method
     case 'top-k-then-v'
         feedback_score(ix(1:rank_threshold)) = v(ix(1:rank_threshold));
 
-    case 'v-only'
+    case 'v'
         feedback_score = v;
 
-    case 'f-only'
+    case 'f'
         feedback_score = f;
         
     case 'v+f'

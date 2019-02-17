@@ -28,15 +28,15 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
  
 
 %% set search ranges of model and experiment parameters
-ctrl_para.exp.fb_method_set = {'f-only', 'v-only', 'top-k-then-v', 'v*f', 'rank(v)/rank(f)'}; 
-ctrl_para.exp.alpha_set = 1e-1; %[1e-2 1e-1 1e0 1e1];
-ctrl_para.exp.beta_percentage_set = 0.05; %[0.01 0.02 0.03 0.04 0.05 0.1 0.2 0.5]; 
-ctrl_para.exp.gamma_set = 1e-2;%[1e-2 1e-1 1e0 1e1 1e2]; 
+ctrl_para.exp.fb_method_set = {'f', 'rank(v)/rank(f)'}; %{'f', 'v', 'v+f', 'v*f', 'rank(v)/rank(f)'}; 
+ctrl_para.exp.alpha_set = 1e-1; %[1e-2 1e-1 1e0]; %1e-1;
+ctrl_para.exp.beta_percentage_set = 0.2; %[0.1 0.2 0.5]; %0.2;
+ctrl_para.exp.gamma_set = 1e-2; %[1e-3 1e-2 1e-1 1e0]; %1e-2;
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 ctrl_para.exp.tot_query_times = 2;
 if debug_flag
-    ctrl_para.exp.fb_num_set = [2];
-    ctrl_para.exp.trial_set = [1 2];
+    ctrl_para.exp.fb_num_set = [1:5];
+    ctrl_para.exp.trial_set = [1:2];
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
 else
@@ -121,7 +121,7 @@ for i=1:para_test_num
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     
     if debug_flag
-%         curr_dataset.probe_set_num = 10;
+        curr_dataset.probe_set_num = 10;
         curr_dataset.groundtruth_rank = curr_dataset.groundtruth_rank(:,1:curr_dataset.probe_set_num);
     end
     
