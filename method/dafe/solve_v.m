@@ -9,6 +9,7 @@ debug_flag = 0;
 v_sum_constraint_flag = model_para.v_sum_constraint_flag;
 alpha = model_para.alpha;
 beta_percentage = model_para.beta_percentage;
+delta = 1e-2;
 p = model_para.p;
 regu_method = model_para.regu_method;
 expected_feedback_num = model_para.expected_feedback_num;
@@ -102,7 +103,7 @@ while 1
     end
     
     H = 2*L_hat_plus;
-    b = -1*(2*d_hat+2*L_hat_minus*vt-n*gamma_cav*partial_vt);
+    b = -1*(2*d_hat+2*L_hat_minus*vt+n*gamma_cav*partial_vt+n*delta*f);
     if v_sum_constraint_flag
         Aeq = zeros(2, n);
         Aeq(1,labeled_gallery_ix) = 1;

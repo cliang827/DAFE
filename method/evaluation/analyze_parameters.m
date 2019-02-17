@@ -147,7 +147,7 @@ fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
 
 switch filter.column.name_set
     case 'feedback_method-fb_num'
-        line_type = {'g^-.', 'bs-.', 'ko--', 'r*-'};
+        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};
         hfig = figure;
         ax = axes;
         n = size(paras,1);
