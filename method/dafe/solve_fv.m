@@ -28,7 +28,7 @@ while 1
     iter_times = iter_times + 1;
 
     %v-step
-    [v, model_para.beta] = solve_v(f, v, y, W, model_para);
+    v = solve_v(f, v, y, W, model_para);
     J_val(1, iter_times) = obj_func(f, v, y, W, model_para);
     v_history(:,iter_times) = v;
 
