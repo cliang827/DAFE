@@ -6,6 +6,8 @@ save('./temp/analyze_parameters.mat', 'result_mat_file');
 % clc
 % load('./temp/analyze_parameters.mat');
 
+% result_mat_file = './result/x270-2019-02-17-22-11-23.mat'; % beta
+% result_mat_file = './result/x270-2019-02-17-22-26-21.mat'; % gamma
 load(result_mat_file);
 
 show_baseline_flag = exist('auc_score_baseline', 'var');
@@ -126,20 +128,20 @@ clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_tem
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'feedback_method-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+filter.column.name_set = 'beta-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 [paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
     para_filter(paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
 try assert(~isnan(paras(1,1)) && ~isempty(paras(1,1)));
 catch, error('wrong filter!'); end
 
-log_alpha = log10(paras(:,1));
+log_alpha = log10(paras(:,2));
 log_alpha(log_alpha==-Inf) = -10;
-beta = paras(:,2);
-log_gamma = log10(paras(:,3));
+beta = paras(:,3);
+log_gamma = log10(paras(:,4));
 log_gamma(log_gamma==-Inf) = -10;
-delta = paras(:,4);
-fbppr = paras(:,5);
+delta = paras(:,5);
+fbppr = paras(:,6);
 
 
 %%
@@ -232,82 +234,68 @@ switch filter.column.name_set
         if ~show_figure_flag, close(hfig); end
 
     case 'alpha-fb_num'
+        log_alpha_set = unique(log(paras(:,2)));
+        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};  
         hfig = figure;
-        ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        log_alpha_set = unique(log_alpha);
-        alpha_num = length(log_alpha_set);
-        for i = 1:alpha_num
-            ix = find(log_alpha==log_alpha_set(i));
-            for qt=1:tot_query_times
-                subplot(alpha_num,tot_query_times,(i-1)*tot_query_times+qt);
-                plot(fb_num_set, auc_y(ix,qt), 'ko--'); hold on;
-                plot(fb_num_set, auc_f_mr1(ix,qt), 'bs-.'); hold on;
-                plot(fb_num_set, auc_f_mr1(ix,qt), 'gs-.'); hold on;
-                plot(fb_num_set, auc_f(ix,qt), 'r*-'); hold on; grid on;
-%                 axis([-Inf Inf ymin ymax]);
-                set(gca, 'xtick', fb_num_set);
-                set(gca,'xticklabel',num2cell(fb_num_set));
-                xlabel('fb\_num');
-                ylabel('auc');
-                legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
-                title(sprintf('log10(alpha)=%.1f, qt=%d',log_alpha_set(i), qt));
+        legend_str = cell(1,length(fb_num_set));
+        for qt=1:tot_query_times
+            subplot(1, tot_query_times, qt);
+            for i=1:length(fb_num_set)
+                plot(log_alpha_set, auc_f(paras(:,6)==fb_num_set(i),qt), line_type{i}); grid on; hold on;
+                legend_str{i} = sprintf('#feedback=%d', fb_num_set(i));                
             end
+            set(gca, 'xtick', log_alpha_set);
+            set(gca, 'xticklabel', num2cell(log_alpha_set));
+            xlabel('log_{10}\alpha');
+            ylabel('nAUC');
+            legend(legend_str, 'location', 'southeast');
+            title(sprintf('query\\_times=%d', qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
-        if ~show_figure_flag, close(hfig); end
+        saveas(hfig, [result_mat_file(1:end-4), '-alpha-fb_num.fig']);
+        if ~show_figure_flag, close(hfig); end        
+
     
     case 'beta-fb_num'
+        beta_set = unique(paras(:,3));
+        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};  
         hfig = figure;
-        ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        beta_set = unique(beta);
-        beta_num = length(beta_set);
-        for i = 1:beta_num
-            ix = find(beta==beta_set(i));
-            for qt=1:tot_query_times
-                subplot(beta_num,tot_query_times,(i-1)*tot_query_times+qt);
-                plot(fb_num_set, auc_y(ix,qt), 'ko--'); hold on;
-                plot(fb_num_set, auc_f_mr1(ix,qt), 'bs-.'); hold on;
-                plot(fb_num_set, auc_f_mr1(ix,qt), 'gs-.'); hold on;
-                plot(fb_num_set, auc_f(ix,qt), 'r*-'); hold on; grid on;
-%                 axis([-Inf Inf ymin ymax]);
-                set(gca, 'xtick', fb_num_set);
-                set(gca,'xticklabel',num2cell(fb_num_set));
-                xlabel('fb\_num');
-                ylabel('auc');
-                legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
-                title(sprintf('beta percentage=%.2f%%, qt=%d',100*beta_set(i), qt));
+        legend_str = cell(1,length(fb_num_set));
+        for qt=1:tot_query_times
+            subplot(1, tot_query_times, qt);
+            for i=1:length(fb_num_set)
+                plot(beta_set, auc_f(paras(:,6)==fb_num_set(i),qt), line_type{i}); grid on; hold on;
+                legend_str{i} = sprintf('#feedback=%d', fb_num_set(i));                
             end
+            set(gca, 'xtick', beta_set);
+            set(gca, 'xticklabel', num2cell(beta_set));
+            xlabel('\beta');
+            ylabel('nAUC');
+            legend(legend_str, 'location', 'southeast');
+            title(sprintf('query\\_times=%d', qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
-        if ~show_figure_flag, close(hfig); end
+        saveas(hfig, [result_mat_file(1:end-4), '-beta-fb_num.fig']);
+        if ~show_figure_flag, close(hfig); end     
         
     case 'gamma-fb_num'
+        log_gamma_set = unique(log(paras(:,4)));
+        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};  
         hfig = figure;
-        ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        log_gamma_set = unique(log_gamma);
-        gamma_num = length(log_gamma_set);
-        for i = 1:gamma_num
-            ix = find(log_gamma==log_gamma_set(i));
-            for qt=1:tot_query_times
-                subplot(gamma_num,tot_query_times,(i-1)*tot_query_times+qt);
-                plot(fb_num_set, auc_y(ix,qt), 'ko--'); hold on;
-                plot(fb_num_set, auc_f_mr1(ix,qt), 'bs-.'); hold on;
-                plot(fb_num_set, auc_f_mr1(ix,qt), 'gs-.'); hold on;
-                plot(fb_num_set, auc_f(ix,qt), 'r*-'); hold on; grid on;
-%                 axis([-Inf Inf ymin ymax]);
-                set(gca, 'xtick', fb_num_set);
-                set(gca,'xticklabel',num2cell(fb_num_set));
-                xlabel('fb\_num');
-                ylabel('auc');
-                legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
-                title(sprintf('log10(gamma)=%.1f, qt=%d',log_gamma_set(i), qt));
+        legend_str = cell(1,length(fb_num_set));
+        for qt=1:tot_query_times
+            subplot(1, tot_query_times, qt);
+            for i=1:length(fb_num_set)
+                plot(log_gamma_set, auc_f(paras(:,6)==fb_num_set(i),qt), line_type{i}); grid on; hold on;
+                legend_str{i} = sprintf('#feedback=%d', fb_num_set(i));                
             end
+            set(gca, 'xtick', log_gamma_set);
+            set(gca, 'xticklabel', num2cell(log_gamma_set));
+            xlabel('log_{10}\gamma');
+            ylabel('nAUC');
+            legend(legend_str, 'location', 'southeast');
+            title(sprintf('query\\_times=%d', qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
-        if ~show_figure_flag, close(hfig); end
+        saveas(hfig, [result_mat_file(1:end-4), '-gamma-fb_num.fig']);
+        if ~show_figure_flag, close(hfig); end  
         
     case 'fb_num'
         hfig = figure;
