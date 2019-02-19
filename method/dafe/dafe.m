@@ -191,7 +191,7 @@ if show_progress_flag
     f_h1 = 100*auc_score_f_h1';
     f_h2 = 100*auc_score_f_h2';
     f_h3 = 100*auc_score_f_h3';
-    T = table(qt,y,f_mr1,f_mr2,f,f_h1,f_h2,f_h3)
+    T = table(qt,y,f_mr1,f_mr2,f,f_h1,f_h2,f_h3);
     
 
     for qt = 1:tot_query_times

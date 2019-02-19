@@ -1,7 +1,7 @@
 function test_dafe(debug_flag, run_mode)
 
-debug_flag = 1; 
-run_mode = 'parallel'; %'parallel'; %'serial';
+%debug_flag = 1; 
+% run_mode = 'serial'; %'parallel'; %'serial';
 
 clearvars -except debug_flag run_mode
 clc

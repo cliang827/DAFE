@@ -1,9 +1,5 @@
 function test_baseline(debug_flag, run_mode)
 
-
-debug_flag = 1; 
-run_mode = 'serial';
-
 clearvars -except debug_flag run_mode
 clc
 close all
@@ -19,10 +15,10 @@ fprintf(1, 'machine_type=%s, run_mode=%s, debug_flag=%d, version=%s\n', ...
     machine_type, run_mode, debug_flag, version_str{1});
 
 fprintf(1, 'dataset=%s, probe_set_num=%d, trial_num=%d, tot_query_times=%d\n', ...
-    curr_dataset.name, curr_dataset.probe_set_num, trial_num, ctrl_para.exp.tot_query_times);
+    dataset_name, curr_dataset.probe_set_num, trial_num, ctrl_para.exp.tot_query_times);
 
-fprintf(1, 'include_groundtruth_flag=%d, v_sum_constraint_flag=%d\n\n', ...
-    ctrl_para.exp.include_groundtruth_flag, ctrl_para.exp.v_sum_constraint);
+fprintf(1, 'regu_method=''%s'', include_groundtruth_flag=%d, v_sum_constraint_flag=%d\n\n', ...
+    ctrl_para.model.regu_method, ctrl_para.exp.include_groundtruth_flag, ctrl_para.exp.v_sum_constraint);
 
 clearvars -except run_mode para_test_set dataset_set ctrl_para_set baseline_para_set eval_para 
 

@@ -18,14 +18,22 @@ switch OS
             curr_working_dir = '/data/liangchao/DAFE/';
             slash ='/';
             if ~exist('run_mode', 'var'), run_mode = 'parallel'; end
-            if ~exist('debug_flag', 'var'), debug_flag = false;  end
+            if ~exist('debug_flag', 'var'), debug_flag = true;  end
+        elseif status==0 && strcmp(cmdout(1:4), 'reid')
+            % reid server
+            machine_type = 'reid';
+            setenv('TZ','Asia/Shanghai');
+            curr_working_dir = '/home/jlx/DAFE_ijcai/DAFE';
+            slash ='/';
+            if ~exist('run_mode', 'var'), run_mode = 'parallel'; end
+            if ~exist('debug_flag', 'var'), debug_flag = true;  end
         else
             error('found unregistered machine');
         end
         
     case 'PCWIN64' % 64-bit windows system
         [status,cmdout] = dos('ECHO %COMPUTERNAME%');
-        if status==0 && strcmp(cmdout(1:15), 'PC-20170623DBSD');
+        if status==0 && strcmp(cmdout(1:15), 'PC-20170623DBSD')
             % cliang's mmap-pc
             machine_type = 'mmap-pc';            
             curr_working_dir = 'D:\work\code\test\DAFE\';
@@ -33,7 +41,7 @@ switch OS
             slash ='\';
             if ~exist('run_mode', 'var'), run_mode = 'parallel'; end
             if ~exist('debug_flag', 'var'), debug_flag = false;  end
-        elseif status==0 && strcmp(cmdout(1:15), 'LAPTOP-V7EOT95U');
+        elseif status==0 && strcmp(cmdout(1:15), 'LAPTOP-V7EOT95U')
             % zye's x1
             machine_type = 'x1';            
             curr_working_dir = 'D:\work\code\test\DAFE\';

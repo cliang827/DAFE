@@ -35,14 +35,14 @@ ctrl_para.exp.gamma_set = 1e-2; %[1e-3 1e-2 1e-1 1e0]; %1e-2;
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 ctrl_para.exp.tot_query_times = 2;
 if debug_flag
-    ctrl_para.exp.fb_num_set = [1:5];
-    ctrl_para.exp.trial_set = [1:2];
+    ctrl_para.exp.fb_num_set = 1:5;
+    ctrl_para.exp.trial_set = 1:2;
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
 else
     ctrl_para.exp.fb_num_set = 2:2:10;
     ctrl_para.exp.trial_set = 1:2:10;
-    ctrl_para.exp.show_progress_flag = false;
+    ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = false;
 end
 ctrl_para.exp.show_table_flag = false;
