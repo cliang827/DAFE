@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'CUHK03detected'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
+% dataset_name = 'CUHK03detected'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
@@ -20,8 +20,8 @@ data_file = load(ctrl_para.dir_info.data_file_dir, ...
     'robot_dist_set', 'groundtruth_rank_set');
 
 version_str = cellstr(datetime('now','Format','y-MM-d-HH-mm-ss'));
-ctrl_para.dir_info.result_file = sprintf('%s%s-%s.mat', ...
-    ctrl_para.dir_info.result_dir, machine_type, version_str{1});
+ctrl_para.dir_info.result_file = sprintf('%s%s-%s_%s.mat', ...
+    ctrl_para.dir_info.result_dir, machine_type, version_str{1},dataset_name);
 ctrl_para.dir_info.log_file = [ctrl_para.dir_info.result_file(1:end-4),'.txt'];
 
 ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];

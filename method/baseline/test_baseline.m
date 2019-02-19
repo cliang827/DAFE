@@ -1,7 +1,7 @@
-function test_baseline(debug_flag, run_mode)
+function test_baseline(debug_flag, run_mode, dataset_name)
 
-clearvars -except debug_flag run_mode
-clc
+% clearvars -except debug_flag run_mode dataset_name
+% clc
 close all
 
 init_environment;
