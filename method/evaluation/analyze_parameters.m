@@ -1,10 +1,10 @@
-function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
-save('./temp/analyze_parameters.mat', 'result_mat_file');
+% function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
+% save('./temp/analyze_parameters.mat', 'result_mat_file');
 
-% close all
-% clear
-% clc
-% load('./temp/analyze_parameters.mat');
+close all
+clear
+clc
+load('./temp/analyze_parameters.mat');
 
 % result_mat_file = './result/x270-2019-02-17-22-11-23.mat'; % beta
 % result_mat_file = './result/x270-2019-02-17-22-26-21.mat'; % gamma
@@ -128,7 +128,7 @@ clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_tem
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'alpha-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+filter.column.name_set = 'alpha-beta-gamma'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 [paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
     para_filter(paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
@@ -217,7 +217,7 @@ switch filter.column.name_set
         draw_fig_alpha_beta_gamma_vs_auc_v;
 
         % figure 3-x: fix alpha, inspect beta and gamma (qt=1,2,3) 
-        draw_fig_v_vs_beta_gamma_qt;
+%         draw_fig_v_vs_beta_gamma_qt;
         
     case 'delta'
         hfig = figure;

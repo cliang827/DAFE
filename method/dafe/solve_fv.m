@@ -12,7 +12,7 @@ epsilon_J = 1e-6;
 outer_loop_max_iter_times = 3;
 
 node_set_num = model_para.node_set_num;
-v_zero = zeros(node_set_num,1);
+v_one = ones(node_set_num,1);
 y_labeled = model_para.y_labeled_v2;
 
 J_val = zeros(2, outer_loop_max_iter_times);
@@ -31,23 +31,17 @@ while 1
     v = solve_v(f, v, y, W, model_para);
     J_val(1, iter_times) = obj_func(f, v, y, W, model_para);
     v_history(:,iter_times) = v;
-    
-    [~, J_details(1, iter_times), J_details(2, iter_times)] = ...
-        obj_func(f, v_zero, y, W, model_para)
 
     %f-step
     f = solve_f(f, v, y, W, model_para);
     J_val(2, iter_times) = obj_func(f, v, y, W, model_para);
     f_history(:,iter_times) = f;
 
-    [~, J_details(1, iter_times), J_details(2, iter_times)] = ...
-        obj_func(f, v_zero, y, W, model_para);
-
     % manifold ranking
     if iter_times==1
-        f_mr(:,1) = solve_f([], v_zero, y, W, model_para);
+        f_mr(:,1) = solve_f([], v_one, y, W, model_para);
 
-        f_mr(:,2) = solve_f([], v_zero, y_labeled, W, model_para);
+        f_mr(:,2) = solve_f([], v_one, y_labeled, W, model_para);
     end
 
 %     break; % check ctrl_para.exp.v_sum_constraint = true;

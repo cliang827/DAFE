@@ -1,4 +1,4 @@
-function [f, fval] = solve_f(f0, v, y, W, model_para)
+function f = solve_f(f0, v, y, W, model_para)
 % purpose: 
 %   solve f directly without splitting it into ulabeled and labeled parts, 
 %   i.e., f = [fu; fl]; (This appears in AAAI'19 draft)
@@ -12,7 +12,7 @@ function [f, fval] = solve_f(f0, v, y, W, model_para)
 alpha = model_para.alpha;
 n = length(y);
 
-v_tilde = (1-v)*(1-v)';
+v_tilde = repmat(v,1,n)+repmat(v',n,1);
 Q_hat = diag(alpha.*sum(v_tilde,2));
 
 P = diag(sum(W,2));
@@ -53,7 +53,7 @@ z = -b;
 lb = zeros(n,1);
 ub = ones(n,1);
 options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');
-[f, fval] = quadprog(H,z,[],[],Aeq,beq,lb,ub,f0,options);
+f = quadprog(H,z,[],[],Aeq,beq,lb,ub,f0,options);
 % time = toc;
 
 % assert(norm(f(nu+1:n) - fl)<epsilon);

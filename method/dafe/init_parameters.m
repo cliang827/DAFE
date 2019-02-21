@@ -29,11 +29,11 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
 
 %% set search ranges of model and experiment parameters
 ctrl_para.exp.fb_method_set = {'rank(v)/rank(f)'}; %{'f', 'v', 'v+f', 'v*f', 'rank(v)/rank(f)'}; 
-ctrl_para.exp.alpha_set = [1e10]; %[1e-3 1e-2 1e-1 1e0 1e1]; %1e-1;
-ctrl_para.exp.beta_percentage_set = [1]; %[0.1 0.2 0.3 0.4 0.5]; %0.2;
-ctrl_para.exp.gamma_set = 0; %[1e-4 1e-3 1e-2 1e-1 1e0]; %1e-2;
+ctrl_para.exp.alpha_set = [1e-1 1e0]; %[1e-3 1e-2 1e-1 1e0 1e1]; %1e-1;
+ctrl_para.exp.beta_percentage_set = [0.2]; %[0.1 0.2 0.3 0.4 0.5]; %0.2;
+ctrl_para.exp.gamma_set = [1e-4 1e-2]; %[1e-4 1e-3 1e-2 1e-1 1e0]; %1e-2;
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
-ctrl_para.exp.tot_query_times = 1;
+ctrl_para.exp.tot_query_times = 2;
 if debug_flag
     ctrl_para.exp.fb_num_set = [3];
     ctrl_para.exp.trial_set = [1];

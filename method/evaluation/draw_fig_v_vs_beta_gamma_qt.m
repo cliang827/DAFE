@@ -4,7 +4,7 @@ beta_num = length(unique(beta(alpha_star_ix)));
 gamma_num = length(unique(log_gamma(alpha_star_ix)));
 v_set = cell(beta_num*gamma_num, 1);
 for i=1:length(alpha_star_ix)
-    v_set{i} = squeeze(mean(difficulty_score{i},3));
+    v_set{i} = squeeze(mean(v{i},3));
 end
 
 for qt=1:ctrl_para.exp_para.tot_query_times

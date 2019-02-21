@@ -1,8 +1,8 @@
 %% figure 1: auc vs. alpha+beta+gamma (3D) and alpha-beta/alpha-gamma/beta-gamma (2D)
 hfig = figure;
 subplot(2,2,1); % alpha-beta-gamma
-diameter = 100*auc_f_kmean(:,tot_query_times);
-color = auc_f_kmean(:,tot_query_times);
+diameter = 100*auc_f(:,tot_query_times);
+color = auc_f(:,tot_query_times);
 scatter3(log_alpha,beta,log_gamma,diameter,color,'linewidth',3);
 xlabel('log(\alpha)');
 ylabel('\beta%');
@@ -16,7 +16,7 @@ end
 caxis manual
 caxis([color_bottom color_top]);
 colorbar;
-title(sprintf('%s+%d',feedback_method,v_sum_constraint));
+title(sprintf('%s',feedback_method_name));
 
 log_alpha_set = unique(log_alpha);
 beta_set = unique(beta);
@@ -26,7 +26,7 @@ subplot(2,2,2); % alpha-beta
 alpha_beta_auc = zeros(length(log_alpha_set), length(beta_set));
 for i=1:length(log_alpha_set)
     for j=1:length(beta_set)
-        alpha_beta_auc(i,j) = mean(auc_f_kmean(log_alpha==log_alpha_set(i) & beta==beta_set(j),2));
+        alpha_beta_auc(i,j) = mean(auc_f(log_alpha==log_alpha_set(i) & beta==beta_set(j),1));
     end
 end
 h = bar3(alpha_beta_auc');
@@ -47,7 +47,7 @@ subplot(2,2,3); % alpha-gamma
 alpha_gamma_auc = zeros(length(log_alpha_set), length(log_gamma_set));
 for i=1:length(log_alpha_set)
     for j=1:length(log_gamma_set)
-        alpha_gamma_auc(i,j) = mean(auc_f_kmean(log_alpha==log_alpha_set(i) & log_gamma==log_gamma_set(j),2));
+        alpha_gamma_auc(i,j) = mean(auc_f(log_alpha==log_alpha_set(i) & log_gamma==log_gamma_set(j),1));
     end
 end
 h = bar3(alpha_gamma_auc');
@@ -67,7 +67,7 @@ subplot(2,2,4); % beta-gamma
 beta_gamma_auc = zeros(length(beta_set), length(log_gamma_set));
 for i=1:length(beta_set)
     for j=1:length(log_gamma_set)
-        beta_gamma_auc(i,j) = mean(auc_f_kmean(beta==beta_set(i) & log_gamma==log_gamma_set(j),2));
+        beta_gamma_auc(i,j) = mean(auc_f(beta==beta_set(i) & log_gamma==log_gamma_set(j),1));
     end
 end
 h = bar3(beta_gamma_auc');
