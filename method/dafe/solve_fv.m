@@ -31,6 +31,9 @@ while 1
     v = solve_v(f, v, y, W, model_para);
     J_val(1, iter_times) = obj_func(f, v, y, W, model_para);
     v_history(:,iter_times) = v;
+    
+    [~, J_details(1, iter_times), J_details(2, iter_times)] = ...
+        obj_func(f, v_zero, y, W, model_para)
 
     %f-step
     f = solve_f(f, v, y, W, model_para);
@@ -49,7 +52,7 @@ while 1
 
 %     break; % check ctrl_para.exp.v_sum_constraint = true;
     if iter_times>=outer_loop_max_iter_times || ...
-            abs(J_val(1, iter_times)-J_val(2, iter_times))<epsilon_J     
+            (iter_times>1 && abs(J_val(1, iter_times)-J_val(2, iter_times))<epsilon_J)
         break;
     end
 end

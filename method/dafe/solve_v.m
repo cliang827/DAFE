@@ -8,7 +8,8 @@ debug_flag = 0;
 
 v_sum_constraint_flag = model_para.v_sum_constraint_flag;
 alpha = model_para.alpha;
-beta = model_para.beta;
+% beta = model_para.beta;
+beta = 0;
 p = model_para.p;
 regu_method = model_para.regu_method;
 expected_feedback_num = model_para.expected_feedback_num;
@@ -17,9 +18,8 @@ unlabeled_gallery_ix = model_para.unlabeled_gallery_set;
 n = model_para.node_set_num;
 
 epsilon = 1e-6; 
-gamma_cav = 0;
-% gamma_cvx = 0;
-gamma_cvx = model_para.gamma;
+gamma_cav = model_para.gamma;
+gamma_cvx = 0;
 
 if debug_flag
     gamma_cav = 0;
