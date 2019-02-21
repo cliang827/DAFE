@@ -33,7 +33,6 @@ query_time_tab = zeros(probe_set_num, tot_query_times);
 iter_time_tab = zeros(probe_set_num, tot_query_times);
 
 model_para.alpha = ctrl_para.model.alpha;
-% model_para.beta = 0;
 beta_percentage = ctrl_para.model.beta_percentage;
 model_para.gamma = ctrl_para.model.gamma;
 model_para.expected_feedback_num = ctrl_para.model.fb_num;
@@ -86,19 +85,22 @@ for i=1:probe_set_num
         f0(1:gallery_set_num) = range_normalization(W(1:gallery_set_num,end));
         
         % parameter: y0
-        y0 = f0;
-        y0(labeled_gallery_set) = feedback_scores;
+%         y0 = f0;
+%         y0(labeled_gallery_set) = feedback_scores;
+        y0 = zeros(node_set_num, 1);
+        y0(node_set_num) = 1;
         
         % parameter: beta
         if query_times == 1
-            f_temp = f0;
-            P = diag(sum(W,2));
-            f_normalized = sqrt(P)\f_temp; % eq.(31) in TR17
-            ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
-            smooth_loss = W.*ff.*ff;
+%             f_temp = f0;
+%             P = diag(sum(W,2));
+%             f_normalized = sqrt(P)\f_temp; % eq.(31) in TR17
+%             ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
+%             smooth_loss = W.*ff.*ff;
             fitting_loss = repmat(ctrl_para.model.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
                 repmat(ctrl_para.model.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
-            total_loss = smooth_loss + fitting_loss;
+%             total_loss = smooth_loss + fitting_loss;
+            total_loss = fitting_loss;
             total_loss(labeled_gallery_set,:) = []; 
             total_loss(:,labeled_gallery_set) = []; 
             sorted_total_loss = sort(total_loss(:), 'descend');

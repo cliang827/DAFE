@@ -128,7 +128,7 @@ clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_tem
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'alpha-beta-gamma'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+filter.column.name_set = 'feedback_method-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 [paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
     para_filter(paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
@@ -156,7 +156,7 @@ fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
 
 switch filter.column.name_set
     case 'feedback_method-fb_num'
-        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};        
+        line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'm>--', 'r*-'};        
         hfig = figure;
         for qt=1:tot_query_times
             subplot(1,tot_query_times,qt);
