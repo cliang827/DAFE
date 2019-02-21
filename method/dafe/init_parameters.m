@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'CUHK03detected'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
+dataset_name = 'VIPeR'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
