@@ -1,12 +1,12 @@
-% function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
-% save('./temp/analyze_parameters.mat', 'result_mat_file');
+function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
+save('./temp/analyze_parameters.mat', 'result_mat_file');
 
-close all
-clear
-clc
-load('./temp/analyze_parameters.mat');
+% close all
+% clear
+% clc
+% load('./temp/analyze_parameters.mat');
 
-% result_mat_file = './result/x270-2019-02-17-22-11-23.mat'; % beta
+% result_mat_file = './result/x270-2019-02-21-02-54-17.mat'; % beta
 % result_mat_file = './result/x270-2019-02-17-22-26-21.mat'; % gamma
 load(result_mat_file);
 
