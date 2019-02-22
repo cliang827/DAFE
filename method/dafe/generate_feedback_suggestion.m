@@ -62,6 +62,7 @@ end
 epsilon = 1e-6;
 %% this trick is to kept ix result output by different machines are the same
 if a(1)-a(1+fb_num)<epsilon
+%     error('no discrimination of current feedback score!');
     rng('default'); 
     trunc_num = sum(a>(a(1)-epsilon));
     sorted_ix = setdiff(sort(ix(1:trunc_num)),labeled_gallery_ix);

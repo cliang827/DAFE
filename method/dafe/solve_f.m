@@ -40,9 +40,9 @@ assert(0==p); % assure A is positive-definite. Large V (>=1) values may trigger 
 H = 2*A;
 z = -b;
 % if isempty(f0)
-    Aeq = zeros(1,n);
-    Aeq(1,n) = 1;
-    beq = 1;
+%     Aeq = zeros(1,n);
+%     Aeq(1,n) = 1;
+%     beq = 1;
 % else
 %     Aeq = zeros(2,n);
 %     Aeq(1,n) = 1;
@@ -53,7 +53,7 @@ z = -b;
 lb = zeros(n,1);
 ub = ones(n,1);
 options = optimoptions('quadprog','Algorithm','interior-point-convex','Display','off');
-f = quadprog(H,z,[],[],Aeq,beq,lb,ub,f0,options);
+f = quadprog(H,z,[],[],[],[],lb,ub,f0,options);
 % time = toc;
 
 % assert(norm(f(nu+1:n) - fl)<epsilon);
