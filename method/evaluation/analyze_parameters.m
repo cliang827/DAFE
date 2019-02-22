@@ -6,7 +6,7 @@ save('./temp/analyze_parameters.mat', 'result_mat_file');
 % clc
 % load('./temp/analyze_parameters.mat');
 
-% result_mat_file = './result/x270-2019-02-21-02-54-17.mat'; % beta
+% result_mat_file = './result/x270-2019-02-21-23-31-54.mat'; % beta
 % result_mat_file = './result/x270-2019-02-17-22-26-21.mat'; % gamma
 load(result_mat_file);
 

@@ -33,7 +33,7 @@ query_time_tab = zeros(probe_set_num, tot_query_times);
 iter_time_tab = zeros(probe_set_num, tot_query_times);
 
 model_para.alpha = ctrl_para.model.alpha;
-model_para.beta_percentage = ctrl_para.model.beta_percentage;
+beta_percentage = ctrl_para.model.beta_percentage;
 model_para.gamma = ctrl_para.model.gamma;
 model_para.fb_num = ctrl_para.model.fb_num;
 model_para.v_sum_constraint = ctrl_para.exp.v_sum_constraint;
@@ -85,25 +85,23 @@ for i=1:probe_set_num
         f0(1:gallery_set_num) = range_normalization(W(1:gallery_set_num,end));
         
         % parameter: y0
-%         y0 = f0;
-%         y0(labeled_gallery_set) = feedback_scores;
         y0 = zeros(node_set_num, 1);
         y0(node_set_num) = 1;
         
         % parameter: beta
 %         if query_times == 1
-%             P = diag(sum(W,2));
-%             f_normalized = sqrt(P)\f0; % eq.(31) in TR17
-%             ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
-%             smooth_loss = W.*ff.*ff;
-%             fitting_loss = repmat(ctrl_para.model.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
-%                 repmat(ctrl_para.model.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
-%             total_loss = smooth_loss + fitting_loss;
-%             total_loss(labeled_gallery_set,:) = []; 
-%             total_loss(:,labeled_gallery_set) = []; 
-%             sorted_total_loss = sort(total_loss(:), 'descend');
-%             sorted_total_loss = sorted_total_loss(1:2:end);
-%             model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
+            P = diag(sum(W,2));
+            f_normalized = sqrt(P)\f0; % eq.(31) in TR17
+            ff = repmat(f_normalized,[1 node_set_num])-repmat(f_normalized',[node_set_num 1]);
+            smooth_loss = W.*ff.*ff;
+            fitting_loss = repmat(ctrl_para.model.alpha.*(f0-y0).*(f0-y0), [1 node_set_num]) + ...
+                repmat(ctrl_para.model.alpha'.*(f0-y0)'.*(f0-y0)',[node_set_num 1]);
+            total_loss = smooth_loss + fitting_loss;
+            total_loss(labeled_gallery_set,:) = []; 
+            total_loss(:,labeled_gallery_set) = []; 
+            sorted_total_loss = sort(total_loss(:), 'descend');
+            sorted_total_loss = sorted_total_loss(1:2:end);
+            model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
 %         end
 
         % others parameters
@@ -116,6 +114,7 @@ for i=1:probe_set_num
 
         [f, v, f_mr, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
         y = f0(1:gallery_set_num);
+%         figure(1); plot(v);
 
         %% result collection
         reid_score_f_mr1(:,i,query_times) = f_mr(1:gallery_set_num,1);

@@ -3,7 +3,9 @@ function [id_tab, name_tab] = generate_feedback_suggestion(f, v, labeled_gallery
 
 % clear
 % clc
-% load('./temp/suggest_feedback_list.mat');
+% load('./temp/generate_feedback_suggestion.mat');
+
+
 rank_threshold = ctrl_para.exp.rank_threshold;
 fb_num = ctrl_para.model.fb_num;
 fb_method = ctrl_para.model.fb_method;
@@ -12,21 +14,26 @@ id_tab = zeros(fb_num,1);
 name_tab = cell(fb_num,1);
 
 
-% v = 1-v;
-
 labeled_gallery_ix(labeled_gallery_ix==(gallery_set_num+1)) = [];
 nl = length(labeled_gallery_ix);
 
 if nl>0
     f(labeled_gallery_ix) = 0;
+    v(labeled_gallery_ix) = 1;
 end
 [~, ix] = sort(f, 'descend');
 [~, rank_f] = sort(ix);
 
 feedback_score = zeros(size(f));
+
+
 switch fb_method
-    case 'top-k-then-v'
-        feedback_score(ix(1:rank_threshold)) = v(ix(1:rank_threshold));
+    case 'rank(v)-in-top-k'
+        ix_set = ix(1:rank_threshold);
+        v_value = v(ix_set);
+        [~, ix_temp] = sort(v_value, 'descend');
+        [~, rank_v] = sort(ix_temp);
+        feedback_score(ix_set) = rank_v;
 
     case 'v'
         feedback_score = v;
@@ -54,6 +61,19 @@ switch fb_method
         [~, rank_v] = sort(ix);
         feedback_score = rank_v./rank_f;
         
+    case 'rank(1-v)/rank(f)'
+        [~, ix] = sort(v, 'descend');
+        [~, rank_v] = sort(ix);
+        feedback_score = rank_v./rank_f;
+        
+    case 'rank(1-v)'
+        [~, ix] = sort(v, 'descend');
+        [~, rank_v] = sort(ix);
+        feedback_score = rank_v;
+        
+    case 'rank(f)'
+        feedback_score = 1./rank_f;
+        
     case 'rand'
         feedback_score = rand(length(v),1);
 end
@@ -62,7 +82,7 @@ end
 epsilon = 1e-6;
 %% this trick is to kept ix result output by different machines are the same
 if a(1)-a(1+fb_num)<epsilon
-%     error('no discrimination of current feedback score!');
+    disp('no discrimination of current feedback score!');
     rng('default'); 
     trunc_num = sum(a>(a(1)-epsilon));
     sorted_ix = setdiff(sort(ix(1:trunc_num)),labeled_gallery_ix);
