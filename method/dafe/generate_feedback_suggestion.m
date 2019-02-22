@@ -12,7 +12,7 @@ id_tab = zeros(fb_num,1);
 name_tab = cell(fb_num,1);
 
 
-v = 1-v;
+% v = 1-v;
 
 labeled_gallery_ix(labeled_gallery_ix==(gallery_set_num+1)) = [];
 nl = length(labeled_gallery_ix);
@@ -53,20 +53,23 @@ switch fb_method
         [~, ix] = sort(v, 'ascend');
         [~, rank_v] = sort(ix);
         feedback_score = rank_v./rank_f;
+        
+    case 'rand'
+        feedback_score = rand(length(v),1);
 end
 
 [a, ix] = sort(feedback_score, 'descend');
-% epsilon = 1e-6;
-% %% this trick is to kept ix result output by different machines are the same
-% if a(1)-a(fb_num)<epsilon
-%     rng('default'); 
-%     trunc_num = sum(a>(a(1)-epsilon));
-%     sorted_ix = setdiff(sort(ix(1:trunc_num)),labeled_gallery_ix);
-%     feedback_score(sorted_ix) = feedback_score(sorted_ix) + ...
-%         rand(length(sorted_ix),1)*epsilon;
-%     [~, ix] = sort(feedback_score, 'descend');
-% end
-% %% trick end
+epsilon = 1e-6;
+%% this trick is to kept ix result output by different machines are the same
+if a(1)-a(1+fb_num)<epsilon
+    rng('default'); 
+    trunc_num = sum(a>(a(1)-epsilon));
+    sorted_ix = setdiff(sort(ix(1:trunc_num)),labeled_gallery_ix);
+    feedback_score(sorted_ix) = feedback_score(sorted_ix) + ...
+        rand(length(sorted_ix),1)*epsilon;
+    [~, ix] = sort(feedback_score, 'descend');
+end
+%% trick end
 
 for i=1:fb_num
     id_tab(i) = ix(i);

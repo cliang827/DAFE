@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'CUHK03detected'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
+dataset_name = 'VIPeR'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
@@ -28,14 +28,14 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
  
 
 %% set search ranges of model and experiment parameters
-ctrl_para.exp.fb_method_set = {'v', '1-v', 'f', 'f+v', 'f-v'}; %{'f', 'v', 'v+f', 'v*f', 'rank(v)/rank(f)'}; 
+ctrl_para.exp.fb_method_set = {'1-v', 'f'}; %{'f', 'v', 'v+f', 'v*f', 'rank(v)/rank(f)'}; 
 ctrl_para.exp.alpha_set = [1e0]; %[1e-3 1e-2 1e-1 1e0 1e1]; %1e-1;
 ctrl_para.exp.beta_percentage_set = [0.2]; %[0.1 0.2 0.3 0.4 0.5]; %0.1;
-ctrl_para.exp.gamma_set = [1e-2]; %[1e-4 1e-3 1e-2 1e-1 1e0]; %1e-2;
+ctrl_para.exp.gamma_set = [1e-1]; %[1e-4 1e-3 1e-2 1e-1 1e0]; %1e-2;
 ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
 ctrl_para.exp.tot_query_times = 2;
 if debug_flag
-    ctrl_para.exp.fb_num_set = [3];
+    ctrl_para.exp.fb_num_set = [1];
     ctrl_para.exp.trial_set = [1];
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
@@ -47,7 +47,7 @@ else
 end
 ctrl_para.exp.show_table_flag = false;
 
-ctrl_para.exp.v_sum_constraint = false;
+ctrl_para.exp.v_sum_constraint = true;
 ctrl_para.exp.include_groundtruth_flag = false;
 ctrl_para.exp.rank_threshold = 20;
 ctrl_para.exp.machine_type = machine_type;

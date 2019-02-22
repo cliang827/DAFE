@@ -9,8 +9,11 @@ function v = solve_v(f, v0, y, W, model_para)
 alpha = model_para.alpha;
 beta = model_para.beta;
 gamma = model_para.gamma;
+fb_num = model_para.fb_num;
+v_sum_constraint = model_para.v_sum_constraint;
 epsilon = 1e-9;
 labeled_gallery_ix = model_para.labeled_gallery_set;
+unlabeled_gallery_ix = model_para.unlabeled_gallery_set;
 n = model_para.node_set_num;
 
 P = diag(sum(W,2));
@@ -24,9 +27,16 @@ L_hat = L-beta;
 b = 2*(sum(L_hat,2));
 H = 2*(epsilon+gamma)*n*eye(n);
 
-Aeq = zeros(1, n);
-Aeq(1,labeled_gallery_ix) = 1;
-beq = length(labeled_gallery_ix);
+if v_sum_constraint
+    Aeq = zeros(2, n);
+    Aeq(1,labeled_gallery_ix) = 1;
+    Aeq(2,unlabeled_gallery_ix) = 1;
+    beq = [length(labeled_gallery_ix);length(unlabeled_gallery_ix)-fb_num];
+else
+    Aeq = zeros(1, n);
+    Aeq(1,labeled_gallery_ix) = 1;
+    beq = [length(labeled_gallery_ix)];
+end
 
 lb = zeros(n,1);
 ub = ones(n,1);

@@ -35,8 +35,8 @@ iter_time_tab = zeros(probe_set_num, tot_query_times);
 model_para.alpha = ctrl_para.model.alpha;
 beta_percentage = ctrl_para.model.beta_percentage;
 model_para.gamma = ctrl_para.model.gamma;
-model_para.expected_feedback_num = ctrl_para.model.fb_num;
-model_para.v_sum_constraint_flag = ctrl_para.exp.v_sum_constraint;
+model_para.fb_num = ctrl_para.model.fb_num;
+model_para.v_sum_constraint = ctrl_para.exp.v_sum_constraint;
 model_para.node_set_num = dataset.node_set_num;
 
 v0 = ones(node_set_num,1);
@@ -91,7 +91,7 @@ for i=1:probe_set_num
         y0(node_set_num) = 1;
         
         % parameter: beta
-        if query_times == 1
+%         if query_times == 1
 %             f_temp = f0;
 %             P = diag(sum(W,2));
 %             f_normalized = sqrt(P)\f_temp; % eq.(31) in TR17
@@ -106,7 +106,7 @@ for i=1:probe_set_num
             sorted_total_loss = sort(total_loss(:), 'descend');
             sorted_total_loss = sorted_total_loss(1:2:end);
             model_para.beta = sorted_total_loss(max(1,floor(beta_percentage*length(sorted_total_loss))));
-        end
+%         end
 
         % others parameters
         model_para.labeled_gallery_set = labeled_gallery_set;
