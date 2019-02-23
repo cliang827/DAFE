@@ -1,11 +1,11 @@
-function [paras_filtered, cmc_f_filtered, auc_y_filtered, auc_f_mr1_filtered, auc_f_mr2_filtered, ...
+function [paras_filtered, cmc_f_filtered, cmc_y_filtered, auc_y_filtered, auc_f_y_method1_filtered, auc_f_y_method2_filtered, ...
     auc_f_filtered, auc_f_h1_filtered, auc_f_h2_filtered, auc_f_h3_filtered, ...
     auc_mr_filtered, auc_emr_filtered, ...
     v_max_filtered, v_mean_filtered, v_std_filtered] = ...
-    para_filter(paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, ...
+    para_filter(paras, cmc_f, cmc_y, auc_y, auc_f_y_method1, auc_f_y_method2, ...
     auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, ...
     v_max, v_mean, v_std, filter)
-% save('./temp/para_filter.mat', 'paras', 'cmc_f', 'auc_y', 'auc_f_mr1', 'auc_f_mr2', ...
+% save('./temp/para_filter.mat', 'paras', 'cmc_f', 'cmc_y', 'auc_y', 'auc_f_y_method1', 'auc_f_y_method2', ...
 %     'auc_f', 'auc_f_h1', 'auc_f_h2', 'auc_f_h3', 'auc_mr', 'auc_emr', ...
 %     'v_max', 'v_mean', 'v_std', 'filter');
 
@@ -16,7 +16,7 @@ function [paras_filtered, cmc_f_filtered, auc_y_filtered, auc_f_mr1_filtered, au
 % if strcmp(filter.column.name_set, 'feedback_method')
 %     assert(size(paras,1)==1);
 %     paras_filtered = paras;
-%     auc_f_mr_filtered = auc_f_mr;
+%     auc_f_y_method_filtered = auc_f_y_method;
 %     auc_f_filtered = auc_f;
 %     auc_y_filtered = auc_y;
 %     v_max_filtered = v_max;
@@ -68,9 +68,10 @@ end
 
 paras(invalid_para_ix==1,:) = [];
 cmc_f(invalid_para_ix==1,:,:) = [];
+cmc_y(invalid_para_ix==1,:,:) = [];
 auc_y(invalid_para_ix==1,:) = [];
-auc_f_mr1(invalid_para_ix==1,:) = [];
-auc_f_mr2(invalid_para_ix==1,:) = [];
+auc_f_y_method1(invalid_para_ix==1,:) = [];
+auc_f_y_method2(invalid_para_ix==1,:) = [];
 auc_f(invalid_para_ix==1,:) = [];
 auc_f_h1(invalid_para_ix==1,:) = [];
 auc_f_h2(invalid_para_ix==1,:) = [];
@@ -110,9 +111,10 @@ if ~isempty(filter_column_ix)
     paras_filtered = zeros(n, size(paras,2));
     
     cmc_f_filtered = zeros(n, size(cmc_f,2),size(cmc_f,3));
+    cmc_y_filtered = zeros(n, size(cmc_y,2),size(cmc_y,3));
     auc_y_filtered = zeros(n, size(auc_y,2));
-    auc_f_mr1_filtered = zeros(n, size(auc_f_mr1,2));
-    auc_f_mr2_filtered = zeros(n, size(auc_f_mr2,2));
+    auc_f_y_method1_filtered = zeros(n, size(auc_f_y_method1,2));
+    auc_f_y_method2_filtered = zeros(n, size(auc_f_y_method2,2));
     auc_f_filtered = zeros(n, size(auc_f,2));
     auc_f_h1_filtered = zeros(n, size(auc_f_h1,2));
     auc_f_h2_filtered = zeros(n, size(auc_f_h2,2));
@@ -130,9 +132,10 @@ if ~isempty(filter_column_ix)
 
         paras_filtered(i,:) = mean(paras(filter_ix_set,:),1);
         cmc_f_filtered(i,:,:) = mean(cmc_f(filter_ix_set, :,:),1);
+        cmc_y_filtered(i,:,:) = mean(cmc_y(filter_ix_set, :,:),1);
         auc_y_filtered(i,:) = mean(auc_y(filter_ix_set, :),1);
-        auc_f_mr1_filtered(i,:) = mean(auc_f_mr1(filter_ix_set, :),1);
-        auc_f_mr2_filtered(i,:) = mean(auc_f_mr2(filter_ix_set, :),1);
+        auc_f_y_method1_filtered(i,:) = mean(auc_f_y_method1(filter_ix_set, :),1);
+        auc_f_y_method2_filtered(i,:) = mean(auc_f_y_method2(filter_ix_set, :),1);
         auc_f_filtered(i,:) = mean(auc_f(filter_ix_set, :),1);
         auc_f_h1_filtered(i,:) = mean(auc_f_h1(filter_ix_set, :),1);
         auc_f_h2_filtered(i,:) = mean(auc_f_h2(filter_ix_set, :),1);
@@ -144,12 +147,17 @@ if ~isempty(filter_column_ix)
         v_std_filtered(i,:) = mean(v_std(filter_ix_set,:),1);    
     end
 else
+    n = size(paras,1);
+    if n==1
+        return;
+    end
+    
     error('needs revision!');
     
 %     paras_filtered = mean(paras,1);
 %     auc_y_filtered = mean(auc_y,1);
-%     auc_f_mr1_filtered = mean(auc_f_mr1,1);
-%     auc_f_mr2_filtered = mean(auc_f_mr2,1);
+%     auc_f_y_method1_filtered = mean(auc_f_y_method1,1);
+%     auc_f_y_method2_filtered = mean(auc_f_y_method2,1);
 %     auc_f_filtered = mean(auc_f,1);
 %     auc_f_h1_filtered = mean(auc_f_h1,1);
 %     auc_f_h2_filtered = mean(auc_f_h2,1);

@@ -37,6 +37,8 @@ beta_percentage = ctrl_para.model.beta_percentage;
 model_para.gamma = ctrl_para.model.gamma;
 model_para.fb_num = ctrl_para.model.fb_num;
 model_para.v_sum_constraint = ctrl_para.exp.v_sum_constraint;
+model_para.test_history_flag = ctrl_para.exp.test_history_flag;
+model_para.test_y_method_flag = ctrl_para.exp.test_y_method_flag;
 model_para.node_set_num = dataset.node_set_num;
 
 v0 = ones(node_set_num,1);
@@ -112,13 +114,13 @@ for i=1:probe_set_num
         model_para.y_labeled_v2 = f0;
         model_para.y_labeled_v2(labeled_gallery_set) = feedback_scores;
 
-        [f, v, f_mr, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
+        [f, v, f_y_method, f_history, iter_times] = solve_fv(f0, v0, y0, W, model_para);
         y = f0(1:gallery_set_num);
 %         figure(1); plot(v);
 
         %% result collection
-        reid_score_f_mr1(:,i,query_times) = f_mr(1:gallery_set_num,1);
-        reid_score_f_mr2(:,i,query_times) = f_mr(1:gallery_set_num,2);
+        reid_score_f_y_method1(:,i,query_times) = f_y_method(1:gallery_set_num,1);
+        reid_score_f_y_method2(:,i,query_times) = f_y_method(1:gallery_set_num,2);
         reid_score_f_h1(:,i,query_times) = squeeze(f_history(1:gallery_set_num,1));
         reid_score_f_h2(:,i,query_times) = squeeze(f_history(1:gallery_set_num,2));
         reid_score_f_h3(:,i,query_times) = squeeze(f_history(1:gallery_set_num,3));
@@ -157,8 +159,8 @@ reid_score.y = reid_score_y;
 reid_score.f = reid_score_f;
 
 auc_score_y = zeros(1, tot_query_times);
-auc_score_f_mr1 = zeros(1, tot_query_times);
-auc_score_f_mr2 = zeros(1, tot_query_times);
+auc_score_f_y_method1 = zeros(1, tot_query_times);
+auc_score_f_y_method2 = zeros(1, tot_query_times);
 auc_score_f = zeros(1, tot_query_times);
 auc_score_f_h1 = zeros(1, tot_query_times);
 auc_score_f_h2 = zeros(1, tot_query_times);
@@ -167,11 +169,11 @@ groundtruth_rank = dataset.groundtruth_rank;
 
 for query_times = 1:tot_query_times
 
-    [~, auc_score_f_mr1(1, query_times)] = ...
-        result_evaluation(reid_score_f_mr1(:,:,query_times), groundtruth_rank);
+    [~, auc_score_f_y_method1(1, query_times)] = ...
+        result_evaluation(reid_score_f_y_method1(:,:,query_times), groundtruth_rank);
     
-    [~, auc_score_f_mr2(1, query_times)] = ...
-        result_evaluation(reid_score_f_mr2(:,:,query_times), groundtruth_rank);
+    [~, auc_score_f_y_method2(1, query_times)] = ...
+        result_evaluation(reid_score_f_y_method2(:,:,query_times), groundtruth_rank);
     
     [~, auc_score_f_h1(1, query_times)] = ...
         result_evaluation(reid_score_f_h1(:,:,query_times), groundtruth_rank);
@@ -189,8 +191,8 @@ for query_times = 1:tot_query_times
         result_evaluation(reid_score_y(:,:,query_times), groundtruth_rank);
 end
 auc_score.y = auc_score_y;
-auc_score.f_mr1 = auc_score_f_mr1;
-auc_score.f_mr2 = auc_score_f_mr2;
+auc_score.f_y_method1 = auc_score_f_y_method1;
+auc_score.f_y_method2 = auc_score_f_y_method2;
 auc_score.f = auc_score_f;
 auc_score.f_h1 = auc_score_f_h1;
 auc_score.f_h2 = auc_score_f_h2;
@@ -204,19 +206,19 @@ if show_progress_flag
     
     qt = [1:tot_query_times]';
     y = 100*auc_score_y';
-    f_mr1 = 100*auc_score_f_mr1';
-    f_mr2 = 100*auc_score_f_mr2';
+    f_y_method1 = 100*auc_score_f_y_method1';
+    f_y_method2 = 100*auc_score_f_y_method2';
     f = 100*auc_score_f';
     f_h1 = 100*auc_score_f_h1';
     f_h2 = 100*auc_score_f_h2';
     f_h3 = 100*auc_score_f_h3';
-    T = table(qt,y,f_mr1,f_mr2,f,f_h1,f_h2,f_h3)
+    T = table(qt,y,f_y_method1,f_y_method2,f,f_h1,f_h2,f_h3)
     
 
     for qt = 1:tot_query_times
-        if qt==1, fprintf('\n\t\ty\tf_mr1\tf_mr2\tf\tf_h1\tf_h2\n'); end
+        if qt==1, fprintf('\n\t\ty\tf_ym1\tf_ym2\tf\tf_h1\tf_h2\n'); end
         fprintf(1, 'qt=%d,\t auc = [%.2f%%\t%.2f%%\t%.2f%%\t%.2f%%|\t%.2f%%\t%.2f%% ]\n', ...
-            qt, 100*auc_score_y(qt), 100*auc_score_f_mr1(qt),  100*auc_score_f_mr2(qt), ...
+            qt, 100*auc_score_y(qt), 100*auc_score_f_y_method1(qt),  100*auc_score_f_y_method2(qt), ...
             100*auc_score_f(qt), 100*auc_score_f_h1(qt), 100*auc_score_f_h2(qt));
     end
 end

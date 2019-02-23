@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'CUHK03detected'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
+dataset_name = 'CUHK01'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
@@ -28,15 +28,16 @@ ctrl_para.dir_info.method_dir = ['.' slash 'method' slash];
  
 
 %% set search ranges of model and experiment parameters
-ctrl_para.exp.fb_method_set = {'rank(v)-in-top-k'}; %{'rank(1-v)', 'rank(f)', 'rank(1-v)/rank(f)', 'rand'}; 
-ctrl_para.exp.alpha_set = [1e-1]; %[1e-3 1e-2 1e-1 1e0 1e1]; %1e-1;
-ctrl_para.exp.beta_percentage_set = [0.1]; %[0.1 0.2 0.3 0.4 0.5]; %0.1;
-ctrl_para.exp.gamma_set = [1e-2]; %[1e-4 1e-3 1e-2 1e-1 1e0]; %1e-2;
-ctrl_para.exp.delta_set = 0; %[0.01 0.5 0.99];
-ctrl_para.exp.tot_query_times = 2;
+ctrl_para.exp.fb_method_set = {'rank(1-v)/rank(f)'}; %{'rank(1-v)', 'rank(f)', 'rank(1-v)/rank(f)', 'rand'}; 
+ctrl_para.exp.alpha_set = 1e-1; %[1e-2 1e-1 1e0 1e1 1e2]; 
+ctrl_para.exp.beta_percentage_set = 0.1; %[0.1 0.2 0.3 0.4 0.5]; %0.1;
+ctrl_para.exp.gamma_set = 1e-3; %[1e-5 1e-4 1e-3 1e-2 1e-1];
+ctrl_para.exp.delta_set = 0;
+ctrl_para.exp.tot_query_times = 3;
+ctrl_para.exp.filter_name = 'dataset-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 if debug_flag
-    ctrl_para.exp.fb_num_set = [3];
-    ctrl_para.exp.trial_set = [1];
+    ctrl_para.exp.fb_num_set = 1:3;
+    ctrl_para.exp.trial_set = 1:2;
     ctrl_para.exp.show_progress_flag = true;
     ctrl_para.exp.show_figure_flag = true;
 else
@@ -47,6 +48,8 @@ else
 end
 ctrl_para.exp.show_table_flag = false;
 
+ctrl_para.exp.test_history_flag = false;
+ctrl_para.exp.test_y_method_flag = false;
 ctrl_para.exp.v_sum_constraint = false;
 ctrl_para.exp.include_groundtruth_flag = false;
 ctrl_para.exp.rank_threshold = 20;
@@ -121,7 +124,7 @@ for i=1:para_test_num
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     
     if debug_flag
-%         curr_dataset.probe_set_num = 20;
+%         curr_dataset.probe_set_num = 5;
         curr_dataset.groundtruth_rank = curr_dataset.groundtruth_rank(:,1:curr_dataset.probe_set_num);
     end
     
@@ -142,3 +145,4 @@ eval_para.machine_type = machine_type;
 eval_para.fb_num_set = ctrl_para.exp.fb_num_set;
 eval_para.data_file_dir = ctrl_para.dir_info.data_file_dir;
 eval_para.groundtruth_rank = curr_dataset.groundtruth_rank;
+eval_para.filter_name = ctrl_para.exp.filter_name;

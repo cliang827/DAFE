@@ -5,9 +5,8 @@ save('./temp/analyze_parameters.mat', 'result_mat_file');
 % clear
 % clc
 % load('./temp/analyze_parameters.mat');
+% result_mat_file = './result/x270-2019-02-22-16-47-04.mat'; % beta
 
-% result_mat_file = './result/x270-2019-02-21-23-31-54.mat'; % beta
-% result_mat_file = './result/x270-2019-02-17-22-26-21.mat'; % gamma
 load(result_mat_file);
 
 show_baseline_flag = exist('auc_score_baseline', 'var');
@@ -47,9 +46,10 @@ if show_baseline_flag
     auc_score_baseline = reshape(auc_score_baseline, trial_num, paras_num)';
 end
 
+cmc_y_temp = zeros(paras_num, gallery_set_num, tot_query_times,trial_num);
 cmc_f_temp = zeros(paras_num, gallery_set_num, tot_query_times,trial_num);
-auc_f_mr1_temp = zeros(paras_num,tot_query_times,trial_num);
-auc_f_mr2_temp = zeros(paras_num,tot_query_times,trial_num);
+auc_f_y_method1_temp = zeros(paras_num,tot_query_times,trial_num);
+auc_f_y_method2_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_h1_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_h2_temp = zeros(paras_num,tot_query_times,trial_num);
 auc_f_h3_temp = zeros(paras_num,tot_query_times,trial_num);
@@ -62,9 +62,10 @@ v_mean_temp = zeros(paras_num,tot_query_times,trial_num);
 v_std_temp = zeros(paras_num,tot_query_times,trial_num);
 time_round_temp = zeros(paras_num,tot_query_times,trial_num);
 
+cmc_y = zeros(paras_num, gallery_set_num, tot_query_times);
 cmc_f = zeros(paras_num, gallery_set_num, tot_query_times);
-auc_f_mr1 = zeros(paras_num,tot_query_times);
-auc_f_mr2 = zeros(paras_num,tot_query_times);
+auc_f_y_method1 = zeros(paras_num,tot_query_times);
+auc_f_y_method2 = zeros(paras_num,tot_query_times);
 auc_f_h1 = zeros(paras_num,tot_query_times);
 auc_f_h2 = zeros(paras_num,tot_query_times);
 auc_f_h3 = zeros(paras_num,tot_query_times);
@@ -84,10 +85,14 @@ for i=1:paras_num
 
         for qt = 1:tot_query_times
             cmc_f_temp(i,:,qt,t) = result_evaluation(reid_score{i,t}.f(:,:,qt), groundtruth_rank); 
+            cmc_y_temp(i,:,qt,t) = result_evaluation(reid_score{i,t}.y(:,:,qt), groundtruth_rank);
         end
         auc_y_temp(i,:,t) = auc_score{i,t}.y;
-        auc_f_mr1_temp(i,:,t) = auc_score{i,t}.f_mr1;
-        auc_f_mr2_temp(i,:,t) = auc_score{i,t}.f_mr2;
+        auc_f_y_method1_temp(i,:,t) = auc_score{i,t}.f_y_method1;
+        auc_f_y_method2_temp(i,:,t) = auc_score{i,t}.f_y_method2;
+%         auc_f_y_method1_temp(i,:,t) = auc_score{i,t}.f_mr1;
+%         auc_f_y_method2_temp(i,:,t) = auc_score{i,t}.f_mr2;
+        
         auc_f_temp(i,:,t) = auc_score{i,t}.f;
         auc_f_h1_temp(i,:,t) = auc_score{i,t}.f_h1;
         auc_f_h2_temp(i,:,t) = auc_score{i,t}.f_h2;
@@ -105,9 +110,10 @@ for i=1:paras_num
     end
     
     cmc_f(i,:,:) = mean(cmc_f_temp(i,:,:,:),4);
+    cmc_y(i,:,:) = mean(cmc_y_temp(i,:,:,:),4);
     auc_y(i,:) = mean(auc_y_temp(i,:,:),3);
-    auc_f_mr1(i,:) = mean(auc_f_mr1_temp(i,:,:),3);
-    auc_f_mr2(i,:) = mean(auc_f_mr2_temp(i,:,:),3);
+    auc_f_y_method1(i,:) = mean(auc_f_y_method1_temp(i,:,:),3);
+    auc_f_y_method2(i,:) = mean(auc_f_y_method2_temp(i,:,:),3);
     auc_f(i,:) = mean(auc_f_temp(i,:,:),3);
     auc_f_h1(i,:) = mean(auc_f_h1_temp(i,:,:),3);
     auc_f_h2(i,:) = mean(auc_f_h2_temp(i,:,:),3);
@@ -124,13 +130,13 @@ for i=1:paras_num
 end
 time_each_probe = time_total/(paras_num*tot_query_times*probe_set_num*trial_num);
 clearvars auc_score difficulty_score time_result
-clearvars auc_f_mr1_temp auc_f_mr2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_temp auc_mr_temp auc_emr_temp
+clearvars auc_f_y_method1_temp auc_f_y_method2_temp auc_f_h1_temp auc_f_h2_temp auc_f_h3_temp auc_mr_temp auc_emr_temp
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = 'feedback_method-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
-[paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
-    para_filter(paras, cmc_f, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
+filter.column.name_set = eval_para.filter_name;
+[paras, cmc_f, cmc_y, auc_y, auc_f_y_method1, auc_f_y_method2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
+    para_filter(paras, cmc_f, cmc_y, auc_y, auc_f_y_method1, auc_f_y_method2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
 try assert(~isnan(paras(1,1)) && ~isempty(paras(1,1)));
 catch, error('wrong filter!'); end
@@ -155,6 +161,95 @@ fprintf(1, 'best result: auc1=%.2f%%, auc%d=%.2f%%, better_num=%d/%d\n', ...
     sum(auc_f(:,tot_query_times)>auc_f(:,1)), size(paras,1));
 
 switch filter.column.name_set
+    
+    case 'dataset-fb_num'
+        line_type = {'b-.',  'g--', 'r-'};        
+        
+        hfig = figure;
+        for qt=1:tot_query_times
+            subplot(2,2,qt);
+            if qt==1
+                legend_str = cell(1,2);
+                cmc = cmc_y(1,:,qt);
+                plot(1:length(cmc), 100*cmc, 'k:'); hold on;
+                legend_str{1} = [num2str(sprintf('%.2f',100*cmc(1))) '% y0'];
+                
+                cmc = cmc_f(paras(:,6)==fb_num_set(1),:,qt);
+                plot(1:length(cmc), 100*cmc, 'r-'); hold on;
+                legend_str{2} = [num2str(sprintf('%.2f',100*cmc(1))) '% f0'];
+                
+                grid on;
+                xlabel(sprintf('rank'));
+                ylabel('CMC');
+                legend(legend_str, 'location', 'southeast'); 
+                title('qt=0 (initial ranking)');
+                continue;
+            end
+            
+            legend_str = cell(1,length(fb_num_set));
+            for i = 1:length(fb_num_set)
+                cmc = cmc_f(paras(:,6)==fb_num_set(i),:,qt);
+                plot(1:length(cmc), 100*cmc, line_type{i}); hold on;
+                legend_str{i} = [num2str(sprintf('%.2f',100*cmc(1))) ...
+                    '% #fb=' num2str(fb_num_set(i))];
+            end
+            grid on; 
+            xlabel(sprintf('rank'));
+            ylabel('CMC');
+            legend(legend_str, 'location', 'southeast'); 
+            if qt==2
+                title(sprintf('qt=1 (1st-round re-ranking)', qt));
+            elseif qt==3
+                title(sprintf('qt=2 (2nd-round re-ranking)', qt));
+            end
+        end
+        
+        line_type = {'bs-.',  'go--', 'r*-'};  
+        subplot(2,2,4);
+        for i=1:length(fb_num_set)
+            plot(1:tot_query_times, 100*auc_f(i,1:tot_query_times), line_type{i}); hold on;
+            legend_str{i} = ['#fb=' num2str(fb_num_set(i))];
+        end
+        grid on; 
+        x_axis_label = [1:tot_query_times];
+        set(gca, 'xtick', x_axis_label);
+        set(gca, 'xticklabel', num2cell(x_axis_label));
+        xlabel(sprintf('query\\_times'));
+        ylabel('nAUC');
+        legend(legend_str, 'location', 'southeast'); 
+        title('nAUC vs. #feedback');
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
+        if ~show_figure_flag, close(hfig); end
+        
+    case 'history-fb_num'
+        line_type = {'ko:', 'g^-.', 'bs-.', 'r*-'};        
+        legend_str = cell(1,2);
+        hfig = figure;
+        for qt=1:tot_query_times
+            subplot(1,tot_query_times,qt);
+            for i=1:2
+                if i<4
+                    name_string = ['auc_f_h = auc_f_h' num2str(i)];
+                    legend_str{i} = ['iteration ' num2str(i)];
+                else
+                    name_string = ['auc_f_h = auc_f'];
+                    legend_str{i} = ['final result'];
+                end
+                eval(name_string);
+                plot(fb_num_set, auc_f_h(:,qt), line_type{i}); grid on; hold on;
+            end
+            set(gca, 'xtick', fb_num_set);
+            set(gca, 'xticklabel', num2cell(fb_num_set));
+            axis([-Inf Inf min(auc_f_h1(:))-0.005 max(auc_f_h2(:))+0.005]);
+            xlabel(sprintf('#feedbacks'));
+            ylabel('nAUC');
+            legend(legend_str, 'location', 'northwest'); 
+            title(sprintf('query\\_times=%d', qt));
+        end        
+        
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
+        if ~show_figure_flag, close(hfig); end
+        
     case 'feedback_method-fb_num'
         line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'm>--', 'r*-'};        
         hfig = figure;
@@ -171,7 +266,7 @@ switch filter.column.name_set
             title(sprintf('query\\_times=%d', qt));
         end        
         
-        saveas(hfig, [result_mat_file(1:end-4), '-feedback_method-fb_num.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
         if ~show_figure_flag, close(hfig); end
         
     case 'feedback_method'
@@ -205,7 +300,7 @@ switch filter.column.name_set
             legend(legend_str, 'location', 'southeast');  
             title(sprintf('query\\_times=%d', qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-feedback_method.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
         if ~show_figure_flag, close(hfig); end
         
         
@@ -223,14 +318,14 @@ switch filter.column.name_set
         hfig = figure;
         delta_set = ctrl_para.exp.delta_set;
         plot(delta_set, mean(auc_y_kmean,2), 'ko--'); hold on;
-        plot(delta_set, mean(auc_f_mr,2), 'bs-.'); hold on;
+        plot(delta_set, mean(auc_f_y_method,2), 'bs-.'); hold on;
         plot(delta_set, mean(auc_f,2), 'r*-'); hold on; grid on;
         set(gca, 'xtick', delta_set);
         set(gca,'xticklabel',num2cell(delta_set));
         xlabel('delta');
         ylabel('auc');
         legend({'y-kmean', 'f-mr', 'f-kmean'}, 'location', 'southeast');
-        saveas(hfig, [result_mat_file(1:end-4), '-delta.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
         if ~show_figure_flag, close(hfig); end
 
     case 'alpha-fb_num'
@@ -251,7 +346,7 @@ switch filter.column.name_set
             legend(legend_str, 'location', 'southeast');
             title(sprintf('query\\_times=%d', qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-alpha-fb_num.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
         if ~show_figure_flag, close(hfig); end        
 
     
@@ -273,7 +368,7 @@ switch filter.column.name_set
             legend(legend_str, 'location', 'southeast');
             title(sprintf('query\\_times=%d', qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-beta-fb_num.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
         if ~show_figure_flag, close(hfig); end     
         
     case 'gamma-fb_num'
@@ -294,18 +389,18 @@ switch filter.column.name_set
             legend(legend_str, 'location', 'southeast');
             title(sprintf('query\\_times=%d', qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-gamma-fb_num.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
         if ~show_figure_flag, close(hfig); end  
         
     case 'fb_num'
         hfig = figure;
-        ymin = floor(100*min([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
-        ymax = ceil(100*max([auc_y(:);auc_f_mr1(:);auc_f_mr2(:);auc_f(:)]))/100;
+        ymin = floor(100*min([auc_y(:);auc_f_y_method1(:);auc_f_y_method2(:);auc_f(:)]))/100;
+        ymax = ceil(100*max([auc_y(:);auc_f_y_method1(:);auc_f_y_method2(:);auc_f(:)]))/100;
         for qt=1:tot_query_times
             subplot(1,tot_query_times, qt);
             plot(fb_num_set, auc_y(:,qt), 'ko--'); hold on;
-            plot(fb_num_set, auc_f_mr1(:,qt), 'bs-.'); hold on;
-            plot(fb_num_set, auc_f_mr1(:,qt), 'gs-.'); hold on;
+            plot(fb_num_set, auc_f_y_method1(:,qt), 'bs-.'); hold on;
+            plot(fb_num_set, auc_f_y_method1(:,qt), 'gs-.'); hold on;
             plot(fb_num_set, auc_f(:,qt), 'r*-'); hold on; grid on;
             axis([-Inf Inf ymin ymax]);
             set(gca, 'xtick', fb_num_set);
@@ -315,7 +410,7 @@ switch filter.column.name_set
             legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'northwest');
             title(sprintf('qt=%d',qt));
         end
-        saveas(hfig, [result_mat_file(1:end-4), '-fb_num.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '.fig']);
         if ~show_figure_flag, close(hfig); end
         
         hfig = figure;
@@ -337,41 +432,41 @@ switch filter.column.name_set
         end
         legend(legend_title, 'location', 'northwest','fontsize',font_size);
         title(feedback_method);
-        saveas(hfig, [result_mat_file(1:end-4), '-fb_num_one_figure.fig']);
+        saveas(hfig, [result_mat_file(1:end-4), '-' filter.column.name_set '_one_figure.fig']);
         if ~show_figure_flag, close(hfig); end
         
         
     case 'single_method'
         %% method comparison - table version
         assert(size(auc_y,1)==1);
-        auc_result = cat(1, auc_y, auc_f_mr1, auc_f_mr2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr);
+        auc_result = cat(1, auc_y, auc_f_y_method1, auc_f_y_method2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr);
         qt = (1:tot_query_times)';
         y = 100*auc_result(1,:)';
-        f_mr1 = 100*auc_result(2,:)';
-        f_mr2 = 100*auc_result(3,:)';
+        f_y_method1 = 100*auc_result(2,:)';
+        f_y_method2 = 100*auc_result(3,:)';
         f = 100*auc_result(4,:)';
         f_h1 = 100*auc_result(5,:)';
         f_h2 = 100*auc_result(6,:)';
         f_h3 = 100*auc_result(7,:)';
         mr = 100*auc_result(8,:)';
         emr = 100*auc_result(9,:)';
-        method_cmp_tab = table(qt,y,f_mr1,f_mr2,f,f_h1,f_h2,f_h3,mr,emr);
+        method_cmp_tab = table(qt,y,f_y_method1,f_y_method2,f,f_h1,f_h2,f_h3,mr,emr);
         if show_table_flag, method_cmp_tab, end
         
         %% method comparison - figure version
         hfig = figure;
         if show_baseline_flag
             plot(auc_y, 'ko--'); hold on;
-            plot(auc_f_mr1, 'rs-.'); hold on;
-            plot(auc_f_mr2, 'r^-.'); hold on;
+            plot(auc_f_y_method1, 'rs-.'); hold on;
+            plot(auc_f_y_method2, 'r^-.'); hold on;
             plot(auc_f, 'r*-'); hold on; grid on;
             plot(auc_mr, 'bs-.'); hold on; grid on;
             plot(auc_emr, 'g^-.'); hold on; grid on;
             legend({'y', 'f-mr1', 'f-mr2', 'f', 'mr', 'emr'}, 'location', 'southeast');
         else
             plot(auc_y, 'ko--'); hold on;
-            plot(auc_f_mr1, 'bs-.'); hold on;
-            plot(auc_f_mr2, 'g^-.'); hold on;
+            plot(auc_f_y_method1, 'bs-.'); hold on;
+            plot(auc_f_y_method2, 'g^-.'); hold on;
             plot(auc_f, 'r*-'); hold on; grid on;
             legend({'y', 'f-mr1', 'f-mr2', 'f'}, 'location', 'southeast');
         end

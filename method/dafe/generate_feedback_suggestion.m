@@ -25,7 +25,7 @@ end
 [~, rank_f] = sort(ix);
 
 feedback_score = zeros(size(f));
-
+epsilon = 1e-6;
 
 switch fb_method
     case 'rank(v)-in-top-k'
@@ -59,12 +59,12 @@ switch fb_method
     case 'rank(v)/rank(f)'
         [~, ix] = sort(v, 'ascend');
         [~, rank_v] = sort(ix);
-        feedback_score = rank_v./rank_f;
+        feedback_score = rank_v./(rank_f-0.1*epsilon);
         
     case 'rank(1-v)/rank(f)'
         [~, ix] = sort(v, 'descend');
         [~, rank_v] = sort(ix);
-        feedback_score = rank_v./rank_f;
+        feedback_score = rank_v./(rank_f-0.1*epsilon);
         
     case 'rank(1-v)'
         [~, ix] = sort(v, 'descend');
@@ -79,7 +79,6 @@ switch fb_method
 end
 
 [a, ix] = sort(feedback_score, 'descend');
-epsilon = 1e-6;
 %% this trick is to kept ix result output by different machines are the same
 if a(1)-a(1+fb_num)<epsilon
     disp('no discrimination of current feedback score!');

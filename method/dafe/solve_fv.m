@@ -1,4 +1,4 @@
-function [f, v, f_mr, f_history, iter_times] = solve_fv(f, v, y, W, model_para)
+function [f, v, f_y_method, f_history, iter_times] = solve_fv(f, v, y, W, model_para)
 % save('./temp/solve_fv.mat', 'f', 'v', 'y', 'W', 'model_para');
 
 
@@ -12,12 +12,12 @@ epsilon_J = 1e-6;
 outer_loop_max_iter_times = 3;
 
 node_set_num = model_para.node_set_num;
-v_one = ones(node_set_num,1);
-y_labeled = model_para.y_labeled_v2;
+% v_one = ones(node_set_num,1);
+y_labeled = model_para.y_labeled;
+y_labeled_v2 = model_para.y_labeled_v2;
 
 J_val = zeros(2, outer_loop_max_iter_times);
-J_details = zeros(2, outer_loop_max_iter_times);
-f_mr = zeros(node_set_num, 2);
+f_y_method = zeros(node_set_num, 2);
 f_history = zeros(node_set_num,outer_loop_max_iter_times+1);
 v_history = zeros(node_set_num,outer_loop_max_iter_times+1);
 
@@ -37,17 +37,23 @@ while 1
     J_val(2, iter_times) = obj_func(f, v, y, W, model_para);
     f_history(:,iter_times) = f;
 
-    % manifold ranking
-    if iter_times==1
-        f_mr(:,1) = solve_f([], v_one, y, W, model_para);
+    % test different y methods
+    if iter_times==1 && model_para.test_y_method_flag
+        f_y_method(:,1) = solve_f([], v, y_labeled, W, model_para);
 
-        f_mr(:,2) = solve_f([], v_one, y_labeled, W, model_para);
+        f_y_method(:,2) = solve_f([], v, y_labeled_v2, W, model_para);
     end
 
-%     break; % check ctrl_para.exp.v_sum_constraint = true;
-    if iter_times>=outer_loop_max_iter_times || ...
-            (iter_times>1 && abs(J_val(1, iter_times)-J_val(2, iter_times))<epsilon_J)
-        break;
+    if model_para.test_history_flag
+        % test multi-round re-ranking results
+        if iter_times>outer_loop_max_iter_times
+            break;
+        end
+    else
+        if iter_times>=outer_loop_max_iter_times || ...
+                abs(J_val(1, iter_times)-J_val(2, iter_times))<epsilon_J
+            break;
+        end
     end
 end
     
