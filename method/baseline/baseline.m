@@ -65,7 +65,7 @@ for i=1:probe_set_num
 end
 
 %%result analysis
-groundtruth_rank = repmat(1:probe_set_num, gallery_set_num, 1);
+groundtruth_rank = dataset.groundtruth_rank;
 if ismember('mr', method_set)
     for query_times = 1:tot_query_times
         [cmc_score.mr(:,query_times), auc_score.mr(1, query_times)] = ...

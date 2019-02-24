@@ -63,6 +63,7 @@ for i=1:para_test_num
     dataset_list{i}.node_set_num = gallery_set_num + 1;
     robot_dist = robot_dist_set{trail_ix};
     dataset_list{i}.robot_feedback_score = dist2sim(robot_dist);
+    dataset_list{i}.groundtruth_rank = groundtruth_rank_set{trail_ix};
     
     feedback_id_list{i} = feedback_id{i};
 end
