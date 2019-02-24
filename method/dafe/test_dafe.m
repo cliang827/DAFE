@@ -1,5 +1,9 @@
 function test_dafe(debug_flag, run_mode)
 
+% bug:
+% 1. CUHK03labeled的trail=7,15在库图像只有99而非100，导致analyze_result函数的groundtruth报错
+% 2. 
+
 debug_flag = 1; 
 run_mode = 'serial'; %'parallel'; %'serial';
 

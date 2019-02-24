@@ -1,4 +1,4 @@
-function [reid_score, auc_score, feedback_id, time_result] = baseline(dataset, feedback_id, para)
+function [reid_score, cmc_score, auc_score, feedback_id, time_result] = baseline(dataset, feedback_id, para)
 % save('./temp/baseline.mat', 'dataset', 'feedback_id', 'para');
 
 % clear
@@ -18,6 +18,7 @@ gallery_set_num = size(gallery_feat,1);
 
 if ismember('mr', method_set)
     reid_score.mr = zeros(gallery_set_num, probe_set_num, tot_query_times);
+    cmc_score.mr = zeros(gallery_set_num, tot_query_times);
     auc_score.mr = zeros(1, tot_query_times);
 %     feedback_id.mr = [];
     time_result.mr = zeros(probe_set_num, tot_query_times);
@@ -25,6 +26,7 @@ end
 if ismember('emr', method_set)
     rng('default');
     reid_score.emr = zeros(gallery_set_num, probe_set_num, tot_query_times);
+    cmc_score.emr = zeros(gallery_set_num, tot_query_times);
     auc_score.emr = zeros(1, tot_query_times);
 %     feedback_id.emr = [];
     time_result.emr = zeros(probe_set_num, tot_query_times);
@@ -66,7 +68,7 @@ end
 groundtruth_rank = repmat(1:probe_set_num, gallery_set_num, 1);
 if ismember('mr', method_set)
     for query_times = 1:tot_query_times
-        [~, auc_score.mr(1, query_times)] = ...
+        [cmc_score.mr(:,query_times), auc_score.mr(1, query_times)] = ...
             result_evaluation(reid_score.mr(:,:,query_times), groundtruth_rank);
     end
     time_result.time_by_round.mr = mean(time_result.mr,1);
@@ -75,7 +77,7 @@ if ismember('mr', method_set)
 end
 if ismember('emr', method_set)
     for query_times = 1:tot_query_times
-        [~, auc_score.emr(1, query_times)] = ...
+        [cmc_score.emr(:,query_times), auc_score.emr(1, query_times)] = ...
             result_evaluation(reid_score.emr(:,:,query_times), groundtruth_rank);
     end
     time_result.time_by_round.emr = mean(time_result.emr,1);

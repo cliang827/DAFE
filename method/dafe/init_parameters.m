@@ -1,5 +1,5 @@
 %% prepare dataset and directories
-dataset_name = 'CUHK01'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
+dataset_name = 'VIPeR'; %'GRID'; %'PRID450s'; %'VIPeR'; %'CUHK03detected'; 'CUHK03labeled';
 feature_name = 'gog';
 metric_name = 'xqda';
 curr_dataset.source = sprintf('%s_%s_%s', dataset_name, feature_name, metric_name);
@@ -34,7 +34,7 @@ ctrl_para.exp.beta_percentage_set = 0.1; %[0.1 0.2 0.3 0.4 0.5]; %0.1;
 ctrl_para.exp.gamma_set = 1e-3; %[1e-5 1e-4 1e-3 1e-2 1e-1];
 ctrl_para.exp.delta_set = 0;
 ctrl_para.exp.tot_query_times = 3;
-ctrl_para.exp.filter_name = 'dataset-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
+ctrl_para.exp.filter_name = 'y_method-fb_num'; %'fb_num', 'feedback_method', 'alpha-beta-gamma', 'fb_num';
 if debug_flag
     ctrl_para.exp.fb_num_set = 1:3;
     ctrl_para.exp.trial_set = 1:2;
@@ -57,11 +57,6 @@ ctrl_para.exp.machine_type = machine_type;
 ctrl_para.exp.run_mode = run_mode;
 ctrl_para.exp.batch_size = batch_size;
 
-
-% ctrl_para.model.tau = 0.1;                               % used for PCM'14 initialization
-% ctrl_para.model.p = 0.9;
-% ctrl_para.model.regu_method = 'cvpr07_spectral_matting'; 
-%'cvpr07_spectral_matting'; 'negative_p_norm'; 'positive_1_norm';
           
 %% construct parameter grid for searching the optimal configuration
 fb_method_num = length(ctrl_para.exp.fb_method_set);
@@ -124,7 +119,7 @@ for i=1:para_test_num
     curr_dataset.node_set_num = curr_dataset.gallery_set_num+1;
     
     if debug_flag
-%         curr_dataset.probe_set_num = 5;
+%         curr_dataset.probe_set_num = 100;
         curr_dataset.groundtruth_rank = curr_dataset.groundtruth_rank(:,1:curr_dataset.probe_set_num);
     end
     

@@ -1,13 +1,40 @@
-function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
-save('./temp/analyze_parameters.mat', 'result_mat_file');
+% function [time_total, time_each_probe] = analyze_parameters(result_mat_file)
+% save('./temp/analyze_parameters.mat', 'result_mat_file');
 
-% close all
-% clear
-% clc
-% load('./temp/analyze_parameters.mat');
-% result_mat_file = './result/x270-2019-02-22-16-47-04.mat'; % beta
+close all
+clear
+clc
+load('./temp/analyze_parameters.mat');
 
+% alpha
+% result_mat_file = './result/alpha/mmap-pc-2019-02-22-18-20-07.mat'; 
+
+% % beta
+% result_mat_file = './result/beta/mmap-pc-2019-02-22-15-38-13.mat'; 
+
+% % gamma
+% result_mat_file = './result/gamma/mmap-pc-2019-02-22-19-29-25.mat'; 
+
+% % feedback_method
+% result_mat_file = './result/feedback_method/mmap-pc-2019-02-22-15-39-35.mat'; 
+
+% % history
+% result_mat_file = './result/history/x270-2019-02-23-08-26-51.mat'; 
 load(result_mat_file);
+
+
+% for i=7:size(auc_score,1)
+%     temp = auc_score{i};
+%     temp.f_y_method1 = temp.f_mr1;
+%     temp.f_y_method2 = temp.f_mr1;
+%     temp = rmfield(temp, 'f_mr1');
+%     temp = rmfield(temp, 'f_mr2');
+%     auc_score{i} = temp;
+% end
+% 
+% save(result_mat_file, 'para_test_set', 'eval_para', 'reid_score', 'difficulty_score', ...
+%             'auc_score', 'feedback_id', 'time_result', '-v7.3');    
+
 
 show_baseline_flag = exist('auc_score_baseline', 'var');
 show_figure_flag = eval_para.show_figure_flag;
@@ -24,7 +51,8 @@ groundtruth_rank = eval_para.groundtruth_rank;
 paras = para_test_set(:,1:6);
 paras_num = size(paras,1);
 if trial_num>1
-    paras(cell2mat(para_test_set(:,end))>1,:)=[];
+    trail_threshold = cell2mat(para_test_set(1,end));
+    paras(cell2mat(para_test_set(:,end))>trail_threshold,:)=[];
     paras_num = size(paras,1);
 end
 
@@ -80,6 +108,7 @@ time_total = 0;
 time_round = zeros(paras_num,tot_query_times);
 for i=1:paras_num
     for t=1:trial_num
+
         time_total = time_total+time_result{i,t}.time_in_total;
         time_round_temp(i,:,t) = time_result{i,t}.time_by_round;
 
@@ -90,8 +119,6 @@ for i=1:paras_num
         auc_y_temp(i,:,t) = auc_score{i,t}.y;
         auc_f_y_method1_temp(i,:,t) = auc_score{i,t}.f_y_method1;
         auc_f_y_method2_temp(i,:,t) = auc_score{i,t}.f_y_method2;
-%         auc_f_y_method1_temp(i,:,t) = auc_score{i,t}.f_mr1;
-%         auc_f_y_method2_temp(i,:,t) = auc_score{i,t}.f_mr2;
         
         auc_f_temp(i,:,t) = auc_score{i,t}.f;
         auc_f_h1_temp(i,:,t) = auc_score{i,t}.f_h1;
@@ -134,7 +161,7 @@ clearvars auc_f_y_method1_temp auc_f_y_method2_temp auc_f_h1_temp auc_f_h2_temp 
 clearvars auc_f_temp auc_y_temp v_max_temp v_mean_temp v_std_temp time_round_temp
 
 %% filter
-filter.column.name_set = eval_para.filter_name;
+filter.column.name_set = 'y_method-fb_num'; %eval_para.filter_name;
 [paras, cmc_f, cmc_y, auc_y, auc_f_y_method1, auc_f_y_method2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std] = ...
     para_filter(paras, cmc_f, cmc_y, auc_y, auc_f_y_method1, auc_f_y_method2, auc_f, auc_f_h1, auc_f_h2, auc_f_h3, auc_mr, auc_emr, v_max, v_mean, v_std, filter);
 
@@ -222,12 +249,14 @@ switch filter.column.name_set
         if ~show_figure_flag, close(hfig); end
         
     case 'history-fb_num'
-        line_type = {'ko:', 'g^-.', 'bs-.', 'r*-'};        
-        legend_str = cell(1,2);
-        hfig = figure;
+        hfig = figure(1);
+        % x-axis denotes #feedback, each line denote #iteration
+        line_type = {'ko:', 'g^-.', 'bs-.', 'r*-'};  
+        history_times = 2;
+        legend_str = cell(1,history_times);
         for qt=1:tot_query_times
             subplot(1,tot_query_times,qt);
-            for i=1:2
+            for i=1:history_times
                 if i<4
                     name_string = ['auc_f_h = auc_f_h' num2str(i)];
                     legend_str{i} = ['iteration ' num2str(i)];
@@ -333,7 +362,7 @@ switch filter.column.name_set
         line_type = {'g^-.', 'bs-.', 'ko--', 'y<--', 'r*-'};  
         hfig = figure;
         legend_str = cell(1,length(fb_num_set));
-        for qt=1:tot_query_times
+        for qt=1:tot_query_times            
             subplot(1, tot_query_times, qt);
             for i=1:length(fb_num_set)
                 plot(log_alpha_set, auc_f(paras(:,6)==fb_num_set(i),qt), line_type{i}); grid on; hold on;

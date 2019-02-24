@@ -24,8 +24,8 @@ reid_score_f = zeros(gallery_set_num, probe_set_num, tot_query_times);
 reid_score_f_h1 = zeros(gallery_set_num, probe_set_num, tot_query_times);
 reid_score_f_h2 = zeros(gallery_set_num, probe_set_num, tot_query_times);
 reid_score_f_h3 = zeros(gallery_set_num, probe_set_num, tot_query_times);
-reid_score_f_mr1 = zeros(gallery_set_num, probe_set_num, tot_query_times);
-reid_score_f_mr2 = zeros(gallery_set_num, probe_set_num, tot_query_times);
+reid_score_f_y_method1 = zeros(gallery_set_num, probe_set_num, tot_query_times);
+reid_score_f_y_method2 = zeros(gallery_set_num, probe_set_num, tot_query_times);
 difficulty_score = zeros(gallery_set_num, probe_set_num, tot_query_times);
 suggest_feedback_id_tab = cell(probe_set_num, tot_query_times);
 suggest_feedback_name_tab = cell(probe_set_num, tot_query_times);
@@ -46,7 +46,6 @@ v0 = ones(node_set_num,1);
 
 show_progress_step = 10;
 for i=1:probe_set_num
-    
     if show_progress_flag && (mod(i,show_progress_step)==0 || i==1)
         nchar = fprintf(1, 'progress=%d/%d (%3.0f%%) ...', i, probe_set_num, 100*i/probe_set_num);
     end

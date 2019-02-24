@@ -24,6 +24,8 @@ v_history = zeros(node_set_num,outer_loop_max_iter_times+1);
 f_history(:,end) = f;
 v_history(:,end) = v;
 
+real_iter_times = 0;
+
 while 1
     iter_times = iter_times + 1;
 
@@ -46,7 +48,13 @@ while 1
 
     if model_para.test_history_flag
         % test multi-round re-ranking results
+        if real_iter_times==0 && ...
+                abs(J_val(1, iter_times)-J_val(2, iter_times))<epsilon_J
+            real_iter_times = iter_times;
+        end
+        
         if iter_times>outer_loop_max_iter_times
+            iter_times = real_iter_times;
             break;
         end
     else

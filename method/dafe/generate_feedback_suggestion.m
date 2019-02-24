@@ -59,12 +59,12 @@ switch fb_method
     case 'rank(v)/rank(f)'
         [~, ix] = sort(v, 'ascend');
         [~, rank_v] = sort(ix);
-        feedback_score = rank_v./(rank_f-0.1*epsilon);
+        feedback_score = rank_v./(rank_f-10*epsilon);
         
     case 'rank(1-v)/rank(f)'
         [~, ix] = sort(v, 'descend');
         [~, rank_v] = sort(ix);
-        feedback_score = rank_v./(rank_f-0.1*epsilon);
+        feedback_score = rank_v./(rank_f-10*epsilon);
         
     case 'rank(1-v)'
         [~, ix] = sort(v, 'descend');
